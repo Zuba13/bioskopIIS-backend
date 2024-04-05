@@ -22,20 +22,18 @@ func initDB() *gorm.DB {
 		return nil
 	}
 
-	// Auto-migrate models for the Blog module
+	// Auto-migrate models for the User and Movie modules
 	database.AutoMigrate(&model.User{})
-	// database.AutoMigrate(&model.BlogRating{})
-	// database.AutoMigrate(&model.BlogComment{})
-	//database.AutoMigrate(&model.Report{})
+	database.AutoMigrate(&model.Movie{})
 
 	return database
 }
 
-func startServer(userHandler *handler.UserHandler) {
+func startServer(userHandler *handler.UserHandler, movieHandler *handler.MovieHandler) {
 	router := mux.NewRouter().StrictSlash(true)
 
 	userHandler.RegisterUserHandler(router)
-	
+	movieHandler.RegisterMovieHandler(router)
 
 	// Serve static files
 	router.PathPrefix("/").Handler(http.FileServer(http.Dir("./static")))
@@ -52,18 +50,23 @@ func main() {
 		return
 	}
 
-	// Initialize Blog repository, service, and handler
+	// Initialize User repository, service, and handler
 	userRepo := &repo.UserRepository{DatabaseConnection: database}
 	userService := &service.UserService{UserRepo: *userRepo}
 	userHandler := &handler.UserHandler{UserService: *userService}
 
-	startServer(userHandler)
+	// Initialize Movie repository, service, and handler
+	movieRepo := &repo.MovieRepository{DatabaseConnection: database}
+	movieService := &service.MovieService{MovieRepository: *movieRepo}
+	movieHandler := &handler.MovieHandler{MovieService: *movieService}
+
+	startServer(userHandler, movieHandler)
 }
 
 func hashPassword(password string) (string, error) {
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
 	if err != nil {
-			return "", err
+		return "", err
 	}
 	return string(hashedPassword), nil
 }
