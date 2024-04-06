@@ -43,3 +43,11 @@ func (mr *MovieRepository) Update(movie *model.Movie) error {
 func (mr *MovieRepository) Delete(id uint) error {
 	return mr.DatabaseConnection.Delete(&model.Movie{}, id).Error
 }
+
+func (mr *MovieRepository) GetProjectionsForMovie(movieID uint) ([]model.Projection, error) {
+	var projections []model.Projection
+	if err := mr.DatabaseConnection.Where("movie_id = ?", movieID).Find(&projections).Error; err != nil {
+		return nil, err
+	}
+	return projections, nil
+}

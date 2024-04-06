@@ -34,3 +34,7 @@ func (ms *MovieService) UpdateMovie(movie *model.Movie) error {
 func (ms *MovieService) DeleteMovie(id uint) error {
 	return ms.MovieRepository.Delete(id)
 }
+
+func (ms *MovieService) GetProjectionsForMovie(movieID uint) ([]model.Projection, error) {
+	return ms.MovieRepository.GetProjectionsForMovie(movieID)
+}

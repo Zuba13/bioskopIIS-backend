@@ -27,6 +27,7 @@ func (mh *MovieHandler) RegisterMovieHandler(r *mux.Router) {
 	r.HandleFunc("/movies/{id}", mh.GetMovieByID).Methods("GET")
 	r.HandleFunc("/movies/{id}", mh.UpdateMovie).Methods("PUT")
 	r.HandleFunc("/movies/{id}", mh.DeleteMovie).Methods("DELETE")
+	r.HandleFunc("/movies/{id}/projections", mh.getProjectionsForMovie).Methods("GET")
 }
 
 func (mh *MovieHandler) CreateMovie(w http.ResponseWriter, r *http.Request) {
@@ -119,5 +120,23 @@ func (mh *MovieHandler) DeleteMovie(w http.ResponseWriter, r *http.Request) {
 	}
 
 	respondWithJSON(w, http.StatusOK, map[string]string{"message": "Movie deleted successfully"})
+}
+
+func (mh *MovieHandler) getProjectionsForMovie(w http.ResponseWriter, r *http.Request) {
+	params := mux.Vars(r)
+	movieID, err := strconv.ParseUint(params["id"], 10, 64)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	// Call the service to get projections for the movie
+	projections, err := mh.MovieService.GetProjectionsForMovie(uint(movieID))
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	respondWithJSON(w, http.StatusOK, projections)
 }
 

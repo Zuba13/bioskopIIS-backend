@@ -9,6 +9,7 @@ import (
 	"bioskop.com/projekat/bioskopIIS-backend/repo"
 	"bioskop.com/projekat/bioskopIIS-backend/service"
 	"github.com/gorilla/mux"
+	"github.com/rs/cors"
 	"golang.org/x/crypto/bcrypt"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
@@ -25,6 +26,7 @@ func initDB() *gorm.DB {
 	// Auto-migrate models for the User and Movie modules
 	database.AutoMigrate(&model.User{})
 	database.AutoMigrate(&model.Movie{})
+	database.AutoMigrate(&model.Projection{})
 
 	return database
 }
@@ -35,7 +37,6 @@ func startServer(userHandler *handler.UserHandler, movieHandler *handler.MovieHa
 	userHandler.RegisterUserHandler(router)
 	movieHandler.RegisterMovieHandler(router)
 
-	// Serve static files
 	router.PathPrefix("/").Handler(http.FileServer(http.Dir("./static")))
 
 	log.Println("Server starting")
@@ -43,7 +44,6 @@ func startServer(userHandler *handler.UserHandler, movieHandler *handler.MovieHa
 }
 
 func main() {
-
 	database := initDB()
 	if database == nil {
 		log.Println("Failed to connect to database!")
@@ -60,7 +60,35 @@ func main() {
 	movieService := &service.MovieService{MovieRepository: *movieRepo}
 	movieHandler := &handler.MovieHandler{MovieService: *movieService}
 
-	startServer(userHandler, movieHandler)
+	projectionRepo := &repo.ProjectionRepository{DatabaseConnection: database}
+	projectionService := &service.ProjectionService{ProjectionRepo: *projectionRepo}
+	projectionHandler := &handler.ProjectionHandler{ProjectionService: *projectionService}
+
+	// Create a new router
+	router := mux.NewRouter().StrictSlash(true)
+
+	// Register your handlers with the router
+	userHandler.RegisterUserHandler(router)
+	movieHandler.RegisterMovieHandler(router)
+	projectionHandler.RegisterProjectionHandler(router)
+
+	// Serve static files
+	router.PathPrefix("/").Handler(http.FileServer(http.Dir("./static")))
+
+	// Create a new CORS middleware with desired options
+	corsMiddleware := cors.New(cors.Options{
+		AllowedOrigins:   []string{"http://localhost:4200"}, // Adjust as needed
+		AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
+		AllowedHeaders:   []string{"*"},
+		AllowCredentials: true,
+	})
+
+	// Use the CORS middleware to wrap the router
+	handler := corsMiddleware.Handler(router)
+
+	// Start the server with the CORS-enabled handler
+	log.Println("Server starting")
+	log.Fatal(http.ListenAndServe(":8085", handler))
 }
 
 func hashPassword(password string) (string, error) {
