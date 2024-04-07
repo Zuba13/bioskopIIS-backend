@@ -87,14 +87,14 @@ func (uh *UserHandler) LoginUser(w http.ResponseWriter, r *http.Request) {
 
 	user, err := uh.UserService.GetUserByUsername(requestBody.Username)
 	if err != nil {
-			http.Error(w, "Invalid username or password 1", http.StatusUnauthorized)
+			http.Error(w, "Invalid credentials.", http.StatusUnauthorized)
 			return
 	}
 
 	if !verifyPassword(user.Password, requestBody.Password) {
 		fmt.Println(user.Password)
 		fmt.Println(requestBody.Password)
-			http.Error(w, "Invalid username or password 2", http.StatusUnauthorized)
+			http.Error(w, "Invalid credentials.", http.StatusUnauthorized)
 			return
 	}
 
