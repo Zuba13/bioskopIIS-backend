@@ -16,18 +16,20 @@ func NewUserService(userRepo repo.UserRepository) *UserService {
 	}
 }
 
-func (us *UserService) RegisterUser(username, email, password string) (*model.User, error) {
+func (us *UserService) RegisterUser(username, email, password, firstName, lastName string) (*model.User, error) {
 	hashedPassword, err := hashPassword(password)
-	
-	if err != nil{
+	if err != nil {
 		return nil, err
 	}
 
 	user := &model.User{
-		Username: username,
-		Email:    email,
-		Password: hashedPassword,
-		Role:     "user", 
+		Username:  username,
+		Email:     email,
+		Password:  hashedPassword,
+		Role:      "user",
+		FirstName: firstName,
+		LastName:  lastName,
+		Money: 0,
 	}
 
 	err = us.UserRepo.CreateUser(user)
@@ -37,6 +39,7 @@ func (us *UserService) RegisterUser(username, email, password string) (*model.Us
 
 	return user, nil
 }
+
 
 
 func (us *UserService) GetUserByID(id uint) (*model.User, error) {
