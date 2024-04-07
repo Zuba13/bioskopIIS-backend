@@ -27,6 +27,7 @@ func initDB() *gorm.DB {
 	database.AutoMigrate(&model.User{})
 	database.AutoMigrate(&model.Movie{})
 	database.AutoMigrate(&model.Projection{})
+	database.AutoMigrate(&model.Hall{})
 
 	return database
 }
@@ -64,6 +65,10 @@ func main() {
 	projectionService := &service.ProjectionService{ProjectionRepo: *projectionRepo}
 	projectionHandler := &handler.ProjectionHandler{ProjectionService: *projectionService}
 
+	hallRepo := &repo.HallRepository{DatabaseConnection: database}
+	hallService := &service.HallService{HallRepository: *hallRepo}
+	hallHandler := &handler.HallHandler{HallService: *hallService}
+
 	// Create a new router
 	router := mux.NewRouter().StrictSlash(true)
 
@@ -71,6 +76,7 @@ func main() {
 	userHandler.RegisterUserHandler(router)
 	movieHandler.RegisterMovieHandler(router)
 	projectionHandler.RegisterProjectionHandler(router)
+	hallHandler.RegisterHallHandler(router)
 
 	// Serve static files
 	router.PathPrefix("/").Handler(http.FileServer(http.Dir("./static")))
