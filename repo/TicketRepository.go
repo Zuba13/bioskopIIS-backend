@@ -59,3 +59,11 @@ func (tr *TicketRepository) GetTicketsByUserID(userID uint) ([]*model.Ticket, er
 	}
 	return tickets, nil
 }
+
+func (tr *TicketRepository) GetTicketsByProjectionID(projectionID uint) ([]*model.Ticket, error) {
+	var tickets []*model.Ticket
+	if err := tr.DB.Where("projection_id= ?", projectionID).Find(&tickets).Error; err != nil {
+		return nil, err
+	}
+	return tickets, nil
+} 

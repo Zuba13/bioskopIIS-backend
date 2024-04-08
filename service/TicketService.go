@@ -38,3 +38,7 @@ func (ts *TicketService) DeleteTicket(id uint) error {
 func (ts *TicketService) GetTicketsByUserID(userID uint) ([]*model.Ticket, error) {
 	return ts.TicketRepository.GetTicketsByUserID(userID)
 }
+
+func (ts *TicketService) GetTicketsByProjectionID(projectionId uint) ([]*model.Ticket, error) {
+	return ts.TicketRepository.GetTicketsByProjectionID(projectionId)
+}

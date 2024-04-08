@@ -72,7 +72,7 @@ func main() {
 
 	ticketRepo := &repo.TicketRepository{DB: database}
 	ticketService := &service.TicketService{TicketRepository: *ticketRepo}
-	ticketHandler := &handler.TicketHandler{TicketService: *ticketService}
+	ticketHandler := &handler.TicketHandler{TicketService: *ticketService, UserService: *userService, ProjectionService: *projectionService}
 
 	// Create a new router
 	router := mux.NewRouter().StrictSlash(true)

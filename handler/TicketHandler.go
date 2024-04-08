@@ -13,11 +13,15 @@ import (
 
 type TicketHandler struct {
 	TicketService service.TicketService
+	UserService service.UserService
+	ProjectionService service.ProjectionService
 }
 
-func NewTicketHandler(ticketService service.TicketService) *TicketHandler {
+func NewTicketHandler(ticketService service.TicketService, userService service.UserService, projectionService service.ProjectionService) *TicketHandler {
 	return &TicketHandler{
 		TicketService: ticketService,
+		UserService: userService,
+		ProjectionService: projectionService,
 	}
 }
 
@@ -28,6 +32,7 @@ func (th *TicketHandler) RegisterTicketHandler(r *mux.Router) {
 	r.HandleFunc("/tickets/{id}", th.UpdateTicket).Methods("PUT")
 	r.HandleFunc("/tickets/{id}", th.DeleteTicket).Methods("DELETE")
 	r.HandleFunc("/tickets/user/{userID}", th.GetTicketsByUserID).Methods("GET")
+	r.HandleFunc("/tickets/projection/{projectionID}", th.GetTicketsByProjectionID).Methods("GET")
 }
 
 func (th *TicketHandler) CreateTicket(w http.ResponseWriter, r *http.Request) {
@@ -42,7 +47,39 @@ func (th *TicketHandler) CreateTicket(w http.ResponseWriter, r *http.Request) {
 	newTicket.CreatedAt = time.Now()
 	newTicket.UpdatedAt = time.Now()
 
-	ticket, err := th.TicketService.CreateTicket(newTicket)
+	// Retrieve the projection associated with the ticket
+	projection, err := th.ProjectionService.GetProjectionByID(newTicket.ProjectionID)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	// Retrieve the user associated with the ticket
+	user, err := th.UserService.GetUserByID(newTicket.UserID)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	// Deduct the ticket price from the user's balance
+	user.Money -= projection.Price
+
+	// Check if the user's balance is negative after updating
+	if user.Money < 0 {
+		http.Error(w, "There is not enough balance on your account to make this purchase", http.StatusBadRequest)
+		return
+	}
+
+		// Create the ticket
+		ticket, err := th.TicketService.CreateTicket(newTicket)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+	
+
+	// Update the user's balance
+	err = th.UserService.UpdateUser(user)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -50,6 +87,8 @@ func (th *TicketHandler) CreateTicket(w http.ResponseWriter, r *http.Request) {
 
 	respondWithJSON(w, http.StatusCreated, ticket)
 }
+
+
 
 func (th *TicketHandler) GetAllTickets(w http.ResponseWriter, r *http.Request) {
 	tickets, err := th.TicketService.GetAllTickets()
@@ -131,6 +170,23 @@ func (th *TicketHandler) GetTicketsByUserID(w http.ResponseWriter, r *http.Reque
 	}
 
 	tickets, err := th.TicketService.GetTicketsByUserID(uint(userID))
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	respondWithJSON(w, http.StatusOK, tickets)
+}
+
+func (th *TicketHandler) GetTicketsByProjectionID(w http.ResponseWriter, r *http.Request) {
+	params := mux.Vars(r)
+	projectionID, err := strconv.ParseUint(params["projectionID"], 10, 64)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	tickets, err := th.TicketService.GetTicketsByProjectionID(uint(projectionID))
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
