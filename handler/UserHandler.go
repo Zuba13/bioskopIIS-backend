@@ -52,22 +52,30 @@ type Claims struct {
 }
 
 func (uh *UserHandler) RegisterUser(w http.ResponseWriter, r *http.Request) {
-    var newUser model.User
-    err := json.NewDecoder(r.Body).Decode(&newUser)
-    if err != nil {
-        http.Error(w, err.Error(), http.StatusBadRequest)
-        return
-    }
+	var newUser model.User
+	err := json.NewDecoder(r.Body).Decode(&newUser)
+	if err != nil {
+			http.Error(w, err.Error(), http.StatusBadRequest)
+			return
+	}
 
+	// Check if all required fields are provided
+	if newUser.Username == "" || newUser.Password == "" || newUser.Email == "" || newUser.FirstName == "" || newUser.LastName == "" {
+			fmt.Println(newUser)
+			http.Error(w, "All fields are required!", http.StatusBadRequest)
+			return
+	}
 
-    user, err := uh.UserService.RegisterUser(newUser.Username, newUser.Email, newUser.Password)
-    if err != nil {
-        http.Error(w, err.Error(), http.StatusInternalServerError)
-        return
-    }
+	// Perform user registration
+	user, err := uh.UserService.RegisterUser(newUser.Username, newUser.Email, newUser.Password, newUser.FirstName, newUser.LastName)
+	if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+	}
 
-    respondWithJSON(w, http.StatusCreated, user)
+	respondWithJSON(w, http.StatusCreated, user)
 }
+
 
 func (uh *UserHandler) LoginUser(w http.ResponseWriter, r *http.Request) {
 	var requestBody LoginRequestBody
@@ -79,14 +87,14 @@ func (uh *UserHandler) LoginUser(w http.ResponseWriter, r *http.Request) {
 
 	user, err := uh.UserService.GetUserByUsername(requestBody.Username)
 	if err != nil {
-			http.Error(w, "Invalid username or password 1", http.StatusUnauthorized)
+			http.Error(w, "Invalid credentials.", http.StatusUnauthorized)
 			return
 	}
 
 	if !verifyPassword(user.Password, requestBody.Password) {
 		fmt.Println(user.Password)
 		fmt.Println(requestBody.Password)
-			http.Error(w, "Invalid username or password 2", http.StatusUnauthorized)
+			http.Error(w, "Invalid credentials.", http.StatusUnauthorized)
 			return
 	}
 
