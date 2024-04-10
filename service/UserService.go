@@ -16,20 +16,18 @@ func NewUserService(userRepo repo.UserRepository) *UserService {
 	}
 }
 
-func (us *UserService) RegisterUser(username, email, password, firstName, lastName string) (*model.User, error) {
+func (us *UserService) RegisterUser(username, email, password string) (*model.User, error) {
 	hashedPassword, err := hashPassword(password)
+
 	if err != nil {
 		return nil, err
 	}
 
 	user := &model.User{
-		Username:  username,
-		Email:     email,
-		Password:  hashedPassword,
-		Role:      "user",
-		FirstName: firstName,
-		LastName:  lastName,
-		Money: 0,
+		Username: username,
+		Email:    email,
+		Password: hashedPassword,
+		Role:     "user",
 	}
 
 	err = us.UserRepo.CreateUser(user)
@@ -39,8 +37,6 @@ func (us *UserService) RegisterUser(username, email, password, firstName, lastNa
 
 	return user, nil
 }
-
-
 
 func (us *UserService) GetUserByID(id uint) (*model.User, error) {
 	return us.UserRepo.GetUserByID(id)
@@ -66,7 +62,7 @@ func (us *UserService) DeleteUser(id uint) error {
 func hashPassword(password string) (string, error) {
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
 	if err != nil {
-			return "", err
+		return "", err
 	}
 	return string(hashedPassword), nil
 }

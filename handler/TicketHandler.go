@@ -12,15 +12,15 @@ import (
 )
 
 type TicketHandler struct {
-	TicketService service.TicketService
-	UserService service.UserService
+	TicketService     service.TicketService
+	UserService       service.UserService
 	ProjectionService service.ProjectionService
 }
 
 func NewTicketHandler(ticketService service.TicketService, userService service.UserService, projectionService service.ProjectionService) *TicketHandler {
 	return &TicketHandler{
-		TicketService: ticketService,
-		UserService: userService,
+		TicketService:     ticketService,
+		UserService:       userService,
 		ProjectionService: projectionService,
 	}
 }
@@ -70,13 +70,12 @@ func (th *TicketHandler) CreateTicket(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-		// Create the ticket
-		ticket, err := th.TicketService.CreateTicket(newTicket)
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
-		}
-	
+	// Create the ticket
+	ticket, err := th.TicketService.CreateTicket(newTicket)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
 
 	// Update the user's balance
 	err = th.UserService.UpdateUser(user)
@@ -87,8 +86,6 @@ func (th *TicketHandler) CreateTicket(w http.ResponseWriter, r *http.Request) {
 
 	respondWithJSON(w, http.StatusCreated, ticket)
 }
-
-
 
 func (th *TicketHandler) GetAllTickets(w http.ResponseWriter, r *http.Request) {
 	tickets, err := th.TicketService.GetAllTickets()
