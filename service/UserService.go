@@ -1,6 +1,8 @@
 package service
 
 import (
+	"fmt"
+
 	"bioskop.com/projekat/bioskopIIS-backend/model"
 	"bioskop.com/projekat/bioskopIIS-backend/repo"
 	"golang.org/x/crypto/bcrypt"
@@ -16,7 +18,7 @@ func NewUserService(userRepo repo.UserRepository) *UserService {
 	}
 }
 
-func (us *UserService) RegisterUser(username, email, password string) (*model.User, error) {
+func (us *UserService) RegisterUser(username, email, password, firstName, lastName string) (*model.User, error) {
 	hashedPassword, err := hashPassword(password)
 
 	if err != nil {
@@ -27,7 +29,10 @@ func (us *UserService) RegisterUser(username, email, password string) (*model.Us
 		Username: username,
 		Email:    email,
 		Password: hashedPassword,
+		FirstName: firstName,
+		LastName: lastName,
 		Role:     "user",
+		Money: 0,
 	}
 
 	err = us.UserRepo.CreateUser(user)
@@ -47,6 +52,7 @@ func (us *UserService) GetUserByUsername(username string) (*model.User, error) {
 }
 
 func (us *UserService) UpdateUser(user *model.User) error {
+	fmt.Println(user.Password)
 	return us.UserRepo.UpdateUser(user)
 }
 

@@ -59,7 +59,7 @@ func (uh *UserHandler) RegisterUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	user, err := uh.UserService.RegisterUser(newUser.Username, newUser.Email, newUser.Password)
+	user, err := uh.UserService.RegisterUser(newUser.Username, newUser.Email, newUser.Password, newUser.FirstName, newUser.LastName)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -150,23 +150,35 @@ func (uh *UserHandler) UpdateUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var updatedUser model.User
+	// Fetch the user's data by ID
+	user, err := uh.UserService.GetUserByID(uint(userID))
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusNotFound)
+		return
+	}
+
+	fmt.Println(user)
+
+	// Decode the updated user data
+	var updatedUser *model.User
 	err = json.NewDecoder(r.Body).Decode(&updatedUser)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
-	updatedUser.ID = uint(userID)
+	updatedUser.Password = user.Password;
 
-	err = uh.UserService.UpdateUser(&updatedUser)
+	// Update the user in the database
+	err = uh.UserService.UpdateUser(updatedUser)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	respondWithJSON(w, http.StatusOK, updatedUser)
+	respondWithJSON(w, http.StatusOK, user)
 }
+
 
 func (uh *UserHandler) DeleteUser(w http.ResponseWriter, r *http.Request) {
 	if !isAllowedRole(r, "admin", uh.UserService) {
