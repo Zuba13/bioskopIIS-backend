@@ -18,7 +18,7 @@ func NewUserService(userRepo repo.UserRepository) *UserService {
 	}
 }
 
-func (us *UserService) RegisterUser(username, email, password, firstName, lastName string) (*model.User, error) {
+func (us *UserService) RegisterUser(username, email, password, firstName, lastName, role string) (*model.User, error) {
 	hashedPassword, err := hashPassword(password)
 
 	if err != nil {
@@ -31,7 +31,7 @@ func (us *UserService) RegisterUser(username, email, password, firstName, lastNa
 		Password: hashedPassword,
 		FirstName: firstName,
 		LastName: lastName,
-		Role:     "user",
+		Role:     role,
 		Money: 0,
 	}
 
