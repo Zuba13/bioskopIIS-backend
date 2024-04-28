@@ -29,6 +29,10 @@ func initDB() *gorm.DB {
 	database.AutoMigrate(&model.Projection{})
 	database.AutoMigrate(&model.Hall{})
 	database.AutoMigrate(&model.Ticket{})
+	database.AutoMigrate(&model.Actor{})
+	database.AutoMigrate(&model.Director{})
+	database.AutoMigrate(&model.DistributionCompany{})
+	database.AutoMigrate(&model.DistributionContract{})
 
 	return database
 }
