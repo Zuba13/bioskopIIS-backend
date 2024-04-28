@@ -15,12 +15,13 @@ const (
 type DistributionContract struct {
 	ID          uint                `gorm:"primary_key" json:"id"`
 	CompanyID   uint                `gorm:"not null" json:"-"`
-	Company     DistributionCompany `gorm:"foreignKey:CompanyID" json:"company"`
+	Company     DistributionCompany `gorm:"constraint:OnUpdate:CASCADE,OnDelete:SET NULL;"`
+	MovieID     uint                `gorm:"not null" json:"movieId"`
 	ManagerID   uint                `gorm:"not null" json:"managerId"`
 	Manager     User                `gorm:"foreignKey:ManagerID" json:"-"`
-	StartDate   time.Time           `gorm:"type:date" json:"startDate"`
-	EndDate     time.Time           `gorm:"type:date" json:"endDate"`
-	Model       ContractModel       `gorm:"type:enum('Bidding','Percentage');not null" json:"type"`
+	StartDate   Date                `gorm:"type:date" json:"startDate"`
+	EndDate     Date                `gorm:"type:date" json:"endDate"`
+	Model       ContractModel       `gorm:"type:contractmodel;not null" json:"type"`
 	AgreedSum   *float32            `gorm:"" json:"agreedSum"`
 	WeeklyCosts *float32            `gorm:"" json:"weeklyCosts"`
 	Percentage  *float32            `gorm:"" json:"percentage"`
@@ -42,4 +43,17 @@ func (dc *DistributionContract) Validate() error {
 		}
 	}
 	return nil
+}
+
+func (dc *DistributionContract) IsExpired() bool {
+	return NewDate(time.Now()).After(dc.EndDate)
+}
+
+func (dc *DistributionContract) OverlapsWith(other *DistributionContract) bool {
+	return !(dc.StartDate.After(other.EndDate) || dc.EndDate.Before(other.StartDate))
+}
+
+func (dc *DistributionContract) IsActive() bool {
+	currentDate := NewDate(time.Now())
+	return !currentDate.Before(dc.StartDate) && !currentDate.After(dc.EndDate)
 }
