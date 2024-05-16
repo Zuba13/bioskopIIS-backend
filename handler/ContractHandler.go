@@ -2,6 +2,7 @@ package handler
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"strconv"
 
@@ -12,33 +13,77 @@ import (
 
 type ContractHandler struct {
 	ContractService service.ContractService
+	ContractItemService service.ContractItemService
 }
 
-func NewContractHandler(contractService service.ContractService) *ContractHandler {
+func NewContractHandler(contractService service.ContractService, contractItemService service.ContractItemService) *ContractHandler {
 	return &ContractHandler{
 		ContractService: contractService,
+		ContractItemService: contractItemService,
 	}
 }
 
 func (mh *ContractHandler) RegisterContractHandler(r *mux.Router) {
-	r.HandleFunc("/contracts", mh.CreateContract).Methods("POST")
+	r.HandleFunc("/contracts", mh.CreateContractWithItems).Methods("POST")
+	//r.HandleFunc("/contracts", mh.CreateContract).Methods("POST")
 	r.HandleFunc("/contracts", mh.GetAllContracts).Methods("GET")
 	r.HandleFunc("/contracts/{id}", mh.GetContractByID).Methods("GET")
 	r.HandleFunc("/contracts/{id}", mh.UpdateContract).Methods("PUT")
 	r.HandleFunc("/contracts/{id}", mh.DeleteContract).Methods("DELETE")
 }
 
-func (mh *ContractHandler) CreateContract(w http.ResponseWriter, r *http.Request) {
+func (ch *ContractHandler) CreateContract(w http.ResponseWriter, r *http.Request) {
 	var newContract model.Contract
 	err := json.NewDecoder(r.Body).Decode(&newContract)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
-	contract, err := mh.ContractService.CreateContract(newContract)
+	contract, err := ch.ContractService.CreateContract(newContract)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
+	}
+
+	respondWithJSON(w, http.StatusCreated, contract)
+} 
+
+func (ch *ContractHandler) CreateContractWithItems(w http.ResponseWriter, r *http.Request) {
+	var newContract model.Contract
+	err := json.NewDecoder(r.Body).Decode(&newContract)
+	fmt.Println(r.Body)
+	fmt.Println(newContract)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	var conItems []model.ContractItem
+	err = json.NewDecoder(r.Body).Decode(&conItems)
+	fmt.Println(&conItems)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	contract, err := ch.ContractService.CreateContract(newContract)
+	if err != nil {
+		fmt.Println("Puklo")
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	for _, item := range conItems {
+		// Do something with each contract item, e.g., validate or process
+		// item is of type model.ContractItem
+		contractItem, err := ch.ContractItemService.CreateContractItem(item)
+		fmt.Println("Usao u iteme")
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		// Append the newly created contract item to the contract object
+		contract.ContractItems = append(contract.ContractItems, contractItem)
 	}
 
 	respondWithJSON(w, http.StatusCreated, contract)

@@ -11,7 +11,7 @@ const (
 )
 
 type Contract struct {
-	Id              uint      `gorm:"primaryKey" json:"Id"`
+	Id              uint      `gorm:"primaryKey;autoIncrement" json:"Id"`
 	Name            string    `gorm:"not null" json:"Name"`
 	SupplierId      uint      `gorm:"not null" json:"SupplierId"`
 	ValidFrom       time.Time `gorm:"not null" json:"validFrom"`
@@ -19,4 +19,5 @@ type Contract struct {
 	DateOfSignature time.Time `gorm:"not null" json:"dateOfSignature"`
 	ContractType    Type      `gorm:"not null" json:"ContractType"`
 	Supplier        Supplier  `gorm:"foreignKey:SupplierId" json:"Supplier"`
+	ContractItems   []ContractItem `gorm:"foreignKey:ContractId" json:"ContractItems"`
 }

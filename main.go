@@ -30,6 +30,7 @@ func initDB() *gorm.DB {
 	database.AutoMigrate(&model.Hall{})
 	database.AutoMigrate(&model.Ticket{})
 	database.AutoMigrate(&model.Contract{})
+	database.AutoMigrate(&model.ContractItem{})
 	database.AutoMigrate(&model.Supplier{})
 	return database
 }
@@ -79,6 +80,10 @@ func main() {
 	contractService := &service.ContractService{ContractRepository: *contractRepo}
 	contractHandler := &handler.ContractHandler{ContractService: *contractService}
 
+	contractItemRepo := &repo.ContractItemRepository{DatabaseConnection: database}
+	contractItemService := &service.ContractItemService{ContractItemRepository: *contractItemRepo}
+	contractItemHandler := &handler.ContractItemHandler{ContractItemService: *contractItemService}
+	
 	supplierRepo := &repo.SupplierRepository{DatabaseConnection: database}
 	supplierService := &service.SupplierService{SupplierRepository: *supplierRepo}
 	supplierHandler := &handler.SupplierHandler{SupplierService: *supplierService}
@@ -94,6 +99,7 @@ func main() {
 	hallHandler.RegisterHallHandler(router)
 	ticketHandler.RegisterTicketHandler(router)
 	contractHandler.RegisterContractHandler(router)
+	contractItemHandler.RegisterContractItemHandler(router)
 	supplierHandler.RegisterSupplierHandler(router)
 
 	// Serve static files

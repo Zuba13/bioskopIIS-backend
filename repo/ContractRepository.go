@@ -22,7 +22,7 @@ func (cr *ContractRepository) Create(contract *model.Contract) (model.Contract, 
 
 func (cr *ContractRepository) GetAll() ([]model.Contract, error) {
 	var movies []model.Contract
-	if err := cr.DatabaseConnection.Find(&movies).Error; err != nil {
+	if err := cr.DatabaseConnection.Preload("ContractItems").Preload("Supplier").Find(&movies).Error; err != nil {
 		return nil, err
 	}
 	return movies, nil
@@ -30,7 +30,7 @@ func (cr *ContractRepository) GetAll() ([]model.Contract, error) {
 
 func (cr *ContractRepository) GetByID(id uint) (model.Contract, error) {
 	var contract model.Contract
-	if err := cr.DatabaseConnection.First(&contract, id).Error; err != nil {
+	if err := cr.DatabaseConnection.Preload("ContractItems").Preload("Supplier").First(&contract, id).Error; err != nil {
 		return model.Contract{}, err
 	}
 	return contract, nil
