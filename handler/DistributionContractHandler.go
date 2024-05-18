@@ -2,13 +2,10 @@ package handler
 
 import (
 	"encoding/json"
-	"fmt"
 	"net/http"
-	"strings"
 
 	"bioskop.com/projekat/bioskopIIS-backend/model"
 	"bioskop.com/projekat/bioskopIIS-backend/service"
-	"github.com/dgrijalva/jwt-go"
 	"github.com/gorilla/mux"
 )
 
@@ -23,9 +20,9 @@ func NewDistributionContractHandler(distributionContractService *service.Distrib
 }
 
 func (dch *DistributionContractHandler) RegisterDistributionContractHandler(r *mux.Router) {
-	r.HandleFunc("/distribution/contract", dch.CreateContract).Methods("POST")
-	r.HandleFunc("/distribution/contract", dch.UpdateContract).Methods("PUT")
-	r.HandleFunc("/distribution/company", dch.GetAllCompanies).Methods("GET")
+	r.HandleFunc("/distribution/contract", RequireRole("manager", dch.CreateContract)).Methods("POST")
+	r.HandleFunc("/distribution/contract", RequireRole("manager", dch.UpdateContract)).Methods("PUT")
+	r.HandleFunc("/distribution/company", RequireRole("manager", dch.GetAllCompanies)).Methods("GET")
 }
 
 func (dch *DistributionContractHandler) CreateContract(w http.ResponseWriter, r *http.Request) {
@@ -35,7 +32,7 @@ func (dch *DistributionContractHandler) CreateContract(w http.ResponseWriter, r 
 		return
 	}
 
-	userId, err := extractUserIDFromJWT(r)
+	userId, err := ExtractUserIDFromJWT(r)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusUnauthorized)
 		return
@@ -84,33 +81,4 @@ func (dch *DistributionContractHandler) GetAllCompanies(w http.ResponseWriter, r
 	}
 
 	respondWithJSON(w, http.StatusOK, companies)
-}
-
-func extractUserIDFromJWT(r *http.Request) (uint, error) {
-	// Retrieve the token from the Authorization header
-	authHeader := r.Header.Get("Authorization")
-	tokenString := strings.TrimPrefix(authHeader, "Bearer ")
-
-	// Parse the token
-	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
-		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
-			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
-		}
-		return JWTSecretKey, nil
-	})
-
-	if err != nil {
-		return 0, err
-	}
-
-	if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
-		userIdFloat, ok := claims["user_id"].(float64)
-		if !ok {
-			return 0, fmt.Errorf("user_id is not a number")
-		}
-		userId := uint(userIdFloat)
-		return userId, nil
-	} else {
-		return 0, fmt.Errorf("invalid token")
-	}
 }

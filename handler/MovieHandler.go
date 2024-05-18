@@ -22,10 +22,10 @@ func NewMovieHandler(movieService service.MovieService) *MovieHandler {
 }
 
 func (mh *MovieHandler) RegisterMovieHandler(r *mux.Router) {
-	r.HandleFunc("/movies", mh.CreateMovie).Methods("POST")
+	r.HandleFunc("/movies", RequireRole("manager", mh.CreateMovie)).Methods("POST")
 	r.HandleFunc("/movies", mh.GetAllMovies).Methods("GET")
 	r.HandleFunc("/movies/{id}", mh.GetMovieByID).Methods("GET")
-	r.HandleFunc("/movies/{id}", mh.UpdateMovie).Methods("PUT")
+	r.HandleFunc("/movies/{id}", RequireRole("manager", mh.UpdateMovie)).Methods("PUT")
 	r.HandleFunc("/movies/{id}", mh.DeleteMovie).Methods("DELETE")
 	r.HandleFunc("/movies/{id}/projections", mh.getProjectionsForMovie).Methods("GET")
 }

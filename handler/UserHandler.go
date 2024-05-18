@@ -115,7 +115,7 @@ func (uh *UserHandler) LoginUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	token, err := generateJWTToken(user.ID)
+	token, err := generateJWTToken(user.ID, user.Role)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -167,7 +167,7 @@ func (uh *UserHandler) UpdateUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	updatedUser.Password = user.Password;
+	updatedUser.Password = user.Password
 
 	// Update the user in the database
 	err = uh.UserService.UpdateUser(updatedUser)
@@ -178,7 +178,6 @@ func (uh *UserHandler) UpdateUser(w http.ResponseWriter, r *http.Request) {
 
 	respondWithJSON(w, http.StatusOK, user)
 }
-
 
 func (uh *UserHandler) DeleteUser(w http.ResponseWriter, r *http.Request) {
 	if !isAllowedRole(r, "admin", uh.UserService) {
@@ -207,11 +206,12 @@ func verifyPassword(hashedPassword, password string) bool {
 	return err == nil
 }
 
-func generateJWTToken(userID uint) (string, error) {
+func generateJWTToken(userID uint, role string) (string, error) {
 	token := jwt.New(jwt.SigningMethodHS256)
 
 	claims := token.Claims.(jwt.MapClaims)
 	claims["user_id"] = userID
+	claims["role"] = role
 	claims["exp"] = time.Now().Add(time.Hour * 24).Unix()
 
 	tokenString, err := token.SignedString(JWTSecretKey)

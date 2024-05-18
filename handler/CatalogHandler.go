@@ -29,10 +29,10 @@ func NewCatalogHandler(catalogService service.CatalogService, actorService servi
 }
 
 func (ch *CatalogHandler) RegisterCatalogHandler(r *mux.Router) {
-	r.HandleFunc("/catalog/movie", ch.GetFilteredMovies).Methods("GET")
-	r.HandleFunc("/catalog/director", ch.GetAllDirectors).Methods("GET")
-	r.HandleFunc("/catalog/actor", ch.GetAllActors).Methods("GET")
-	r.HandleFunc("/catalog/movie/{id:[0-9]+}", ch.GetMovieWithAssociations).Methods("GET")
+	r.HandleFunc("/catalog/movie", RequireRole("manager", ch.GetFilteredMovies)).Methods("GET")
+	r.HandleFunc("/catalog/director", RequireRole("manager", ch.GetAllDirectors)).Methods("GET")
+	r.HandleFunc("/catalog/actor", RequireRole("manager", ch.GetAllActors)).Methods("GET")
+	r.HandleFunc("/catalog/movie/{id:[0-9]+}", RequireRole("manager", ch.GetMovieWithAssociations)).Methods("GET")
 }
 
 func (ch *CatalogHandler) GetFilteredMovies(w http.ResponseWriter, r *http.Request) {
