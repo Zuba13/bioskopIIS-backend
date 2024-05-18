@@ -41,16 +41,18 @@ func (d *Date) Scan(value interface{}) error {
 		*d = Date{Time: time.Time{}}
 		return nil
 	}
-	if bv, err := driver.String.ConvertValue(value); err == nil {
-		// If this is a string type
-		if v, ok := bv.(string); ok {
-			t, err := time.Parse("2006-01-02", v)
-			if err != nil {
-				return err
-			}
-			*d = Date{Time: t}
-			return nil
+	switch v := value.(type) {
+	case time.Time:
+		*d = Date{Time: v}
+		return nil
+	case string:
+		t, err := time.Parse("2006-01-02", v)
+		if err != nil {
+			return err
 		}
+		*d = Date{Time: t}
+		return nil
+	default:
+		return errors.New("failed to scan Date")
 	}
-	return errors.New("failed to scan Date")
 }
