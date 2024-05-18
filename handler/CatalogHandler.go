@@ -9,9 +9,11 @@ import (
 )
 
 type MovieResponse struct {
-	Title string `json:"title"`
-	Year  int    `json:"year"`
-	Image string `json:"image"`
+	ID           uint    `json:"id"`
+	Title        string  `json:"title"`
+	Year         int     `json:"year"`
+	Image        string  `json:"image"`
+	DefaultPrice float64 `json:"defaultPrice"`
 }
 
 type CatalogHandler struct {
@@ -54,7 +56,13 @@ func (ch *CatalogHandler) GetFilteredMovies(w http.ResponseWriter, r *http.Reque
 		return
 	}
 
-	movies, err := ch.CatalogService.GetFilteredMovies(title, year, onlyActive)
+	withContract, err := parseBoolQueryParam(r, "withContract", false)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	movies, err := ch.CatalogService.GetFilteredMovies(title, year, onlyActive, withContract)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -63,9 +71,11 @@ func (ch *CatalogHandler) GetFilteredMovies(w http.ResponseWriter, r *http.Reque
 	movieResponses := make([]MovieResponse, len(movies))
 	for i, movie := range movies {
 		movieResponses[i] = MovieResponse{
-			Title: movie.Title,
-			Year:  movie.Year,
-			Image: movie.Image,
+			ID:           movie.ID,
+			Title:        movie.Title,
+			Year:         movie.Year,
+			Image:        movie.Image,
+			DefaultPrice: movie.DefaultPrice,
 		}
 	}
 

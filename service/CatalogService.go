@@ -17,13 +17,13 @@ func NewCatalogService(movieRepository repo.MovieRepository, contractRepository 
 	}
 }
 
-func (ms *CatalogService) GetFilteredMovies(title string, year int, onlyActive bool) ([]model.Movie, error) {
+func (ms *CatalogService) GetFilteredMovies(title string, year int, onlyActive bool, withContract bool) ([]model.Movie, error) {
 	movies, err := ms.MovieRepository.GetFiltered(title, year)
 	if err != nil {
 		return nil, err
 	}
 
-	if !onlyActive {
+	if !onlyActive && !withContract {
 		return movies, nil
 	}
 
@@ -35,7 +35,7 @@ func (ms *CatalogService) GetFilteredMovies(title string, year int, onlyActive b
 		}
 
 		for _, contract := range contracts {
-			if contract.IsActive() {
+			if contract.IsActive() || (withContract && !contract.IsExpired()) {
 				activeMovies = append(activeMovies, movie)
 				break
 			}
