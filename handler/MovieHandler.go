@@ -42,7 +42,7 @@ func (mh *MovieHandler) CreateMovie(w http.ResponseWriter, r *http.Request) {
 	newMovie.CreatedAt = time.Now()
 	newMovie.UpdatedAt = time.Now()
 
-	movie, err := mh.MovieService.CreateMovie(newMovie)
+	movie, err := mh.MovieService.Create(newMovie)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -86,23 +86,23 @@ func (mh *MovieHandler) UpdateMovie(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var updatedMovie model.Movie
-	err = json.NewDecoder(r.Body).Decode(&updatedMovie)
+	var movie model.Movie
+	err = json.NewDecoder(r.Body).Decode(&movie)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
-	updatedMovie.ID = uint(movieID)
-	updatedMovie.UpdatedAt = time.Now()
+	movie.ID = uint(movieID)
+	movie.UpdatedAt = time.Now()
 
-	err = mh.MovieService.UpdateMovie(&updatedMovie)
+	updatedMovie, err := mh.MovieService.Update(&movie)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	respondWithJSON(w, http.StatusOK, updatedMovie)
+	respondWithJSON(w, http.StatusOK, *updatedMovie)
 }
 
 func (mh *MovieHandler) DeleteMovie(w http.ResponseWriter, r *http.Request) {
@@ -139,4 +139,3 @@ func (mh *MovieHandler) getProjectionsForMovie(w http.ResponseWriter, r *http.Re
 
 	respondWithJSON(w, http.StatusOK, projections)
 }
-

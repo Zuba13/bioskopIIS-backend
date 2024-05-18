@@ -31,8 +31,8 @@ func initDB() *gorm.DB {
 	database.AutoMigrate(&model.Ticket{})
 	database.AutoMigrate(&model.Actor{})
 	database.AutoMigrate(&model.Director{})
-	database.AutoMigrate(&model.DistributionCompany{})
-	database.AutoMigrate(&model.DistributionContract{})
+	database.Exec("DO $$ BEGIN CREATE TYPE contractmodel AS ENUM ('Bidding', 'Percentage'); EXCEPTION WHEN duplicate_object THEN null; END $$;")
+	database.AutoMigrate(&model.DistributionCompany{}, &model.DistributionContract{})
 
 	return database
 }
@@ -78,6 +78,19 @@ func main() {
 	ticketService := &service.TicketService{TicketRepository: *ticketRepo}
 	ticketHandler := &handler.TicketHandler{TicketService: *ticketService, UserService: *userService, ProjectionService: *projectionService}
 
+	actorRepo := &repo.ActorRepository{DatabaseConnection: database}
+	directorRepo := &repo.DirectorRepository{DatabaseConnection: database}
+	contractRepo := &repo.DistributionContractRepository{DatabaseConnection: database}
+	actorService := &service.ActorService{ActorRepository: *actorRepo}
+	directorService := &service.DirectorService{DirectorRepository: *directorRepo}
+	catalogService := &service.CatalogService{MovieRepository: *movieRepo, ContractReposiotry: *contractRepo}
+	catalogHandler := &handler.CatalogHandler{CatalogService: *catalogService, ActorService: *actorService, DirectorService: *directorService}
+
+	distContractRepo := &repo.DistributionContractRepository{DatabaseConnection: database}
+	distCompanyRepo := &repo.DistributionCompanyRepository{DatabaseConnection: database}
+	distContractService := &service.DistributionContractService{DistributionContractRepository: distContractRepo, DistributionCompanyRepository: distCompanyRepo}
+	distContractHandler := &handler.DistributionContractHandler{DistributionContractService: distContractService}
+
 	// Create a new router
 	router := mux.NewRouter().StrictSlash(true)
 
@@ -87,6 +100,8 @@ func main() {
 	projectionHandler.RegisterProjectionHandler(router)
 	hallHandler.RegisterHallHandler(router)
 	ticketHandler.RegisterTicketHandler(router)
+	catalogHandler.RegisterCatalogHandler(router)
+	distContractHandler.RegisterDistributionContractHandler(router)
 
 	// Serve static files
 	router.PathPrefix("/").Handler(http.FileServer(http.Dir("./static")))

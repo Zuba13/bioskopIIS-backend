@@ -1,6 +1,8 @@
 package service
 
 import (
+	"log"
+
 	"bioskop.com/projekat/bioskopIIS-backend/model"
 	"bioskop.com/projekat/bioskopIIS-backend/repo"
 )
@@ -15,7 +17,7 @@ func NewMovieService(movieRepository repo.MovieRepository) *MovieService {
 	}
 }
 
-func (ms *MovieService) CreateMovie(movie model.Movie) (model.Movie, error) {
+func (ms *MovieService) Create(movie model.Movie) (model.Movie, error) {
 	return ms.MovieRepository.Create(&movie)
 }
 
@@ -27,8 +29,13 @@ func (ms *MovieService) GetMovieByID(id uint) (model.Movie, error) {
 	return ms.MovieRepository.GetByID(id)
 }
 
-func (ms *MovieService) UpdateMovie(movie *model.Movie) error {
-	return ms.MovieRepository.Update(movie)
+func (ms *MovieService) Update(movie *model.Movie) (*model.Movie, error) {
+	updatedMovie, err := ms.MovieRepository.Update(movie)
+	if err != nil {
+		log.Printf("Failed to update movie: %v", err)
+		return nil, err
+	}
+	return updatedMovie, nil
 }
 
 func (ms *MovieService) DeleteMovie(id uint) error {

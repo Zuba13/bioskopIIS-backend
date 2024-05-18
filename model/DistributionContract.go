@@ -21,25 +21,34 @@ type DistributionContract struct {
 	Manager     User                `gorm:"foreignKey:ManagerID" json:"-"`
 	StartDate   Date                `gorm:"type:date" json:"startDate"`
 	EndDate     Date                `gorm:"type:date" json:"endDate"`
-	Model       ContractModel       `gorm:"type:contractmodel;not null" json:"type"`
+	Model       ContractModel       `gorm:"type:contractmodel;not null" json:"model"`
 	AgreedSum   *float32            `gorm:"" json:"agreedSum"`
 	WeeklyCosts *float32            `gorm:"" json:"weeklyCosts"`
 	Percentage  *float32            `gorm:"" json:"percentage"`
 }
 
 func (dc *DistributionContract) Validate() error {
+	if dc.Company.Name == "" {
+		return errors.New("company cannot be null")
+	}
 	if dc.StartDate.After(dc.EndDate) {
 		return errors.New("startDate must be before endDate")
 	}
 	if dc.Model == Bidding && dc.AgreedSum == nil {
-		return errors.New("agreedSum cannot be null when contract type is bidding")
+		return errors.New("agreedSum cannot be null when contract model is bidding")
+	}
+	if dc.Model == Bidding && (dc.WeeklyCosts != nil || dc.Percentage != nil) {
+		return errors.New("weeklyCosts and percentage must be null when contract model is bidding")
 	}
 	if dc.Model == Percentage {
+		if dc.AgreedSum != nil {
+			return errors.New("agreedSum must be null when contract model is percentage")
+		}
 		if dc.WeeklyCosts == nil {
-			return errors.New("weeklyCosts cannot be null when contract type is percentage")
+			return errors.New("weeklyCosts cannot be null when contract model is percentage")
 		}
 		if dc.Percentage == nil {
-			return errors.New("percentage cannot be null when contract type is percentage")
+			return errors.New("percentage cannot be null when contract model is percentage")
 		}
 	}
 	return nil
