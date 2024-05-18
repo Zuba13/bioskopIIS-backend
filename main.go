@@ -83,13 +83,12 @@ func main() {
 
 	actorRepo := &repo.ActorRepository{DatabaseConnection: database}
 	directorRepo := &repo.DirectorRepository{DatabaseConnection: database}
-	contractRepo := &repo.DistributionContractRepository{DatabaseConnection: database}
+	distContractRepo := &repo.DistributionContractRepository{DatabaseConnection: database}
 	actorService := &service.ActorService{ActorRepository: *actorRepo}
 	directorService := &service.DirectorService{DirectorRepository: *directorRepo}
-	catalogService := &service.CatalogService{MovieRepository: *movieRepo, ContractReposiotry: *contractRepo}
+	catalogService := &service.CatalogService{MovieRepository: *movieRepo, ContractReposiotry: *distContractRepo}
 	catalogHandler := &handler.CatalogHandler{CatalogService: *catalogService, ActorService: *actorService, DirectorService: *directorService}
 
-	distContractRepo := &repo.DistributionContractRepository{DatabaseConnection: database}
 	distCompanyRepo := &repo.DistributionCompanyRepository{DatabaseConnection: database}
 	distContractService := &service.DistributionContractService{DistributionContractRepository: distContractRepo, DistributionCompanyRepository: distCompanyRepo}
 	distContractHandler := &handler.DistributionContractHandler{DistributionContractService: distContractService}
