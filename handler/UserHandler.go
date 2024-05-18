@@ -28,6 +28,7 @@ func NewUserHandler(userService service.UserService) *UserHandler {
 
 func (uh *UserHandler) RegisterUserHandler(r *mux.Router) {
 	r.HandleFunc("/users/register", uh.RegisterUser).Methods("POST")
+	r.HandleFunc("/users/registerCashier", uh.RegisterCashier).Methods("POST")
 	r.HandleFunc("/users/login", uh.LoginUser).Methods("POST")
 	r.HandleFunc("/users/{id}", uh.GetUserByID).Methods("GET")
 	r.HandleFunc("/users/{id}", uh.UpdateUser).Methods("PUT")
@@ -59,7 +60,15 @@ func (uh *UserHandler) RegisterUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	user, err := uh.UserService.RegisterUser(newUser.Username, newUser.Email, newUser.Password, newUser.FirstName, newUser.LastName)
+	// Check if all required fields are provided
+	if newUser.Username == "" || newUser.Password == "" || newUser.Email == "" || newUser.FirstName == "" || newUser.LastName == "" {
+		fmt.Println(newUser)
+		http.Error(w, "All fields are required!", http.StatusBadRequest)
+		return
+	}
+
+	// Perform user registration
+	user, err := uh.UserService.RegisterUser(newUser.Username, newUser.Email, newUser.Password, newUser.FirstName, newUser.LastName, "user")
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -68,31 +77,30 @@ func (uh *UserHandler) RegisterUser(w http.ResponseWriter, r *http.Request) {
 	respondWithJSON(w, http.StatusCreated, user)
 }
 
-// func (uh *UserHandler) UpdateUser(w http.ResponseWriter, r *http.Request) {
-// 	// Decode the request body into a User struct
-// 	var updatedUser model.User
-// 	err := json.NewDecoder(r.Body).Decode(&updatedUser)
-// 	if err != nil {
-// 		http.Error(w, err.Error(), http.StatusBadRequest)
-// 		return
-// 	}
+func (uh *UserHandler) RegisterCashier(w http.ResponseWriter, r *http.Request) {
+	var newUser model.User
+	err := json.NewDecoder(r.Body).Decode(&newUser)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
 
-// 	// Check if all required fields are provided
-// 	if updatedUser.Username == "" || updatedUser.Email == "" || updatedUser.FirstName == "" || updatedUser.LastName == "" {
-// 		http.Error(w, "All fields are required!", http.StatusBadRequest)
-// 		return
-// 	}
+	// Check if all required fields are provided
+	if newUser.Username == "" || newUser.Password == "" || newUser.Email == "" || newUser.FirstName == "" || newUser.LastName == "" {
+		fmt.Println(newUser)
+		http.Error(w, "All fields are required!", http.StatusBadRequest)
+		return
+	}
 
-// 	// Perform user update
-// 	err = uh.UserService.UpdateUser(&updatedUser) // Pass the address of updatedUser
-// 	if err != nil {
-// 		http.Error(w, err.Error(), http.StatusInternalServerError)
-// 		return
-// 	}
+	// Perform user registration
+	user, err := uh.UserService.RegisterUser(newUser.Username, newUser.Email, newUser.Password, newUser.FirstName, newUser.LastName, "cashier")
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
 
-// 	// Respond with the updated user
-// 	respondWithJSON(w, http.StatusOK, updatedUser)
-// }
+	respondWithJSON(w, http.StatusCreated, user)
+}
 
 func (uh *UserHandler) LoginUser(w http.ResponseWriter, r *http.Request) {
 	var requestBody LoginRequestBody
@@ -104,14 +112,14 @@ func (uh *UserHandler) LoginUser(w http.ResponseWriter, r *http.Request) {
 
 	user, err := uh.UserService.GetUserByUsername(requestBody.Username)
 	if err != nil {
-		http.Error(w, "Invalid username or password 1", http.StatusUnauthorized)
+		http.Error(w, "Invalid credentials.", http.StatusUnauthorized)
 		return
 	}
 
 	if !verifyPassword(user.Password, requestBody.Password) {
 		fmt.Println(user.Password)
 		fmt.Println(requestBody.Password)
-		http.Error(w, "Invalid username or password 2", http.StatusUnauthorized)
+		http.Error(w, "Invalid credentials.", http.StatusUnauthorized)
 		return
 	}
 
@@ -150,33 +158,22 @@ func (uh *UserHandler) UpdateUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Fetch the user's data by ID
-	user, err := uh.UserService.GetUserByID(uint(userID))
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusNotFound)
-		return
-	}
-
-	fmt.Println(user)
-
-	// Decode the updated user data
-	var updatedUser *model.User
+	var updatedUser model.User
 	err = json.NewDecoder(r.Body).Decode(&updatedUser)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
-	updatedUser.Password = user.Password
+	updatedUser.ID = uint(userID)
 
-	// Update the user in the database
-	err = uh.UserService.UpdateUser(updatedUser)
+	err = uh.UserService.UpdateUser(&updatedUser)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	respondWithJSON(w, http.StatusOK, user)
+	respondWithJSON(w, http.StatusOK, updatedUser)
 }
 
 func (uh *UserHandler) DeleteUser(w http.ResponseWriter, r *http.Request) {

@@ -33,6 +33,9 @@ func initDB() *gorm.DB {
 	database.AutoMigrate(&model.Director{})
 	database.Exec("DO $$ BEGIN CREATE TYPE contractmodel AS ENUM ('Bidding', 'Percentage'); EXCEPTION WHEN duplicate_object THEN null; END $$;")
 	database.AutoMigrate(&model.DistributionCompany{}, &model.DistributionContract{})
+	database.AutoMigrate(&model.Contract{})
+	database.AutoMigrate(&model.ContractItem{})
+	database.AutoMigrate(&model.Supplier{})
 
 	return database
 }
@@ -91,6 +94,18 @@ func main() {
 	distContractService := &service.DistributionContractService{DistributionContractRepository: distContractRepo, DistributionCompanyRepository: distCompanyRepo}
 	distContractHandler := &handler.DistributionContractHandler{DistributionContractService: distContractService}
 
+	contractRepo := &repo.ContractRepository{DatabaseConnection: database}
+	contractService := &service.ContractService{ContractRepository: *contractRepo}
+	contractHandler := &handler.ContractHandler{ContractService: *contractService}
+
+	contractItemRepo := &repo.ContractItemRepository{DatabaseConnection: database}
+	contractItemService := &service.ContractItemService{ContractItemRepository: *contractItemRepo}
+	contractItemHandler := &handler.ContractItemHandler{ContractItemService: *contractItemService}
+
+	supplierRepo := &repo.SupplierRepository{DatabaseConnection: database}
+	supplierService := &service.SupplierService{SupplierRepository: *supplierRepo}
+	supplierHandler := &handler.SupplierHandler{SupplierService: *supplierService}
+
 	// Create a new router
 	router := mux.NewRouter().StrictSlash(true)
 
@@ -102,6 +117,9 @@ func main() {
 	ticketHandler.RegisterTicketHandler(router)
 	catalogHandler.RegisterCatalogHandler(router)
 	distContractHandler.RegisterDistributionContractHandler(router)
+	contractHandler.RegisterContractHandler(router)
+	contractItemHandler.RegisterContractItemHandler(router)
+	supplierHandler.RegisterSupplierHandler(router)
 
 	// Serve static files
 	router.PathPrefix("/").Handler(http.FileServer(http.Dir("./static")))
