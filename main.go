@@ -24,6 +24,7 @@ func initDB() *gorm.DB {
 	}
 
 	// Auto-migrate models for the User and Movie modules
+	database.AutoMigrate(&model.TheatreInfo{})
 	database.AutoMigrate(&model.User{})
 	database.AutoMigrate(&model.Movie{})
 	database.AutoMigrate(&model.Projection{})
@@ -105,6 +106,7 @@ func main() {
 	supplierService := &service.SupplierService{SupplierRepository: *supplierRepo}
 	supplierHandler := &handler.SupplierHandler{SupplierService: *supplierService}
 
+	theatreInfoRepo := &repo.TheatreInfoRepository{DatabaseConnection: database}
 	// Create a new router
 	router := mux.NewRouter().StrictSlash(true)
 
