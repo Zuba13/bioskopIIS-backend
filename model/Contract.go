@@ -21,3 +21,17 @@ type Contract struct {
 	Supplier        Supplier  `gorm:"foreignKey:SupplierId" json:"Supplier"`
 	ContractItems   []ContractItem `gorm:"foreignKey:ContractId" json:"ContractItems"`
 }
+
+type BaseContractDTO struct {
+	Name            string    `json:"name"`
+	ValidFrom       time.Time `json:"validFrom"`
+	ValidUntil      time.Time `json:"validUntil"`
+	SupplierId      string      `json:"supplier"`
+	ResponsiblePerson string  `json:"responsiblePerson"`
+	ContractType    string       `json:"contractType"`
+}
+
+type CreateContractDTO struct {
+	BaseData      BaseContractDTO `json:"baseData"`
+	ContractItems []ContractItemDTO  `json:"contractItems"`
+}

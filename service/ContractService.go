@@ -23,6 +23,10 @@ func (contractService *ContractService) GetAllContracts() ([]model.Contract, err
 	return contractService.ContractRepository.GetAll()
 }
 
+func (contractService *ContractService) GetAllSupplierContracts(supplierId uint) ([]model.Contract, error) {
+	return contractService.ContractRepository.GetAllSupplierContracts(supplierId)
+}
+
 func (contractService *ContractService) GetContractById(id uint) (model.Contract, error) {
 	return contractService.ContractRepository.GetByID(id)
 }

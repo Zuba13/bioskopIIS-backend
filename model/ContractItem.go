@@ -7,3 +7,9 @@ type ContractItem struct {
 	Quantity   uint    `gorm:"not null" json:"Quantity"`
 	Price      float32 `gorm:"not null" json:"Price"`
 }
+
+type ContractItemDTO struct {
+	Name     string  `json:"name"`
+	Quantity uint    `json:"quantity"`
+	Price    float32 `json:"price"`
+}

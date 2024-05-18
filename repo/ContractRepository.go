@@ -21,11 +21,19 @@ func (cr *ContractRepository) Create(contract *model.Contract) (model.Contract, 
 }
 
 func (cr *ContractRepository) GetAll() ([]model.Contract, error) {
-	var movies []model.Contract
-	if err := cr.DatabaseConnection.Preload("ContractItems").Preload("Supplier").Find(&movies).Error; err != nil {
+	var contracts []model.Contract
+	if err := cr.DatabaseConnection.Preload("ContractItems").Preload("Supplier").Find(&contracts).Error; err != nil {
 		return nil, err
 	}
-	return movies, nil
+	return contracts, nil
+}
+
+func (cr *ContractRepository) GetAllSupplierContracts(supplierId uint) ([]model.Contract, error) {
+	var contracts []model.Contract
+	if err := cr.DatabaseConnection.Preload("ContractItems").Preload("Supplier").Where("supplier_id = ?", supplierId).Find(&contracts).Error; err != nil {
+		return nil, err
+	}
+	return contracts, nil
 }
 
 func (cr *ContractRepository) GetByID(id uint) (model.Contract, error) {

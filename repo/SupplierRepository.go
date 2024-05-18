@@ -28,6 +28,8 @@ func (sr *SupplierRepository) GetAll() ([]model.Supplier, error) {
 	return movies, nil
 }
 
+
+
 func (sr *SupplierRepository) GetByID(id uint) (model.Supplier, error) {
 	var supplier model.Supplier
 	if err := sr.DatabaseConnection.First(&supplier, id).Error; err != nil {
