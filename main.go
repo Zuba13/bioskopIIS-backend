@@ -29,7 +29,15 @@ func initDB() *gorm.DB {
 	database.AutoMigrate(&model.Projection{})
 	database.AutoMigrate(&model.Hall{})
 	database.AutoMigrate(&model.Ticket{})
+
 	database.AutoMigrate(&model.Review{})
+	database.AutoMigrate(&model.Actor{})
+	database.AutoMigrate(&model.Director{})
+	database.Exec("DO $$ BEGIN CREATE TYPE contractmodel AS ENUM ('Bidding', 'Percentage'); EXCEPTION WHEN duplicate_object THEN null; END $$;")
+	database.AutoMigrate(&model.DistributionCompany{}, &model.DistributionContract{})
+	database.AutoMigrate(&model.Contract{})
+	database.AutoMigrate(&model.ContractItem{})
+	database.AutoMigrate(&model.Supplier{})
 
 	return database
 }
@@ -75,9 +83,34 @@ func main() {
 	ticketService := &service.TicketService{TicketRepository: *ticketRepo}
 	ticketHandler := &handler.TicketHandler{TicketService: *ticketService, UserService: *userService, ProjectionService: *projectionService}
 
+
 	reviewRepo := &repo.ReviewRepository{DatabaseConnection: database}
 	reviewService := &service.ReviewService{ReviewRepo: *reviewRepo}
 	reviewHandler := &handler.ReviewHandler{ReviewService: *reviewService}
+
+	actorRepo := &repo.ActorRepository{DatabaseConnection: database}
+	directorRepo := &repo.DirectorRepository{DatabaseConnection: database}
+	distContractRepo := &repo.DistributionContractRepository{DatabaseConnection: database}
+	actorService := &service.ActorService{ActorRepository: *actorRepo}
+	directorService := &service.DirectorService{DirectorRepository: *directorRepo}
+	catalogService := &service.CatalogService{MovieRepository: *movieRepo, ContractReposiotry: *distContractRepo}
+	catalogHandler := &handler.CatalogHandler{CatalogService: *catalogService, ActorService: *actorService, DirectorService: *directorService}
+
+	distCompanyRepo := &repo.DistributionCompanyRepository{DatabaseConnection: database}
+	distContractService := &service.DistributionContractService{DistributionContractRepository: distContractRepo, DistributionCompanyRepository: distCompanyRepo}
+	distContractHandler := &handler.DistributionContractHandler{DistributionContractService: distContractService}
+
+	contractRepo := &repo.ContractRepository{DatabaseConnection: database}
+	contractService := &service.ContractService{ContractRepository: *contractRepo}
+	contractHandler := &handler.ContractHandler{ContractService: *contractService}
+
+	contractItemRepo := &repo.ContractItemRepository{DatabaseConnection: database}
+	contractItemService := &service.ContractItemService{ContractItemRepository: *contractItemRepo}
+	contractItemHandler := &handler.ContractItemHandler{ContractItemService: *contractItemService}
+
+	supplierRepo := &repo.SupplierRepository{DatabaseConnection: database}
+	supplierService := &service.SupplierService{SupplierRepository: *supplierRepo}
+	supplierHandler := &handler.SupplierHandler{SupplierService: *supplierService}
 
 	// Create a new router
 	router := mux.NewRouter().StrictSlash(true)
@@ -88,7 +121,14 @@ func main() {
 	projectionHandler.RegisterProjectionHandler(router)
 	hallHandler.RegisterHallHandler(router)
 	ticketHandler.RegisterTicketHandler(router)
+
 	reviewHandler.RegisterReviewHandler(router)
+
+	catalogHandler.RegisterCatalogHandler(router)
+	distContractHandler.RegisterDistributionContractHandler(router)
+	contractHandler.RegisterContractHandler(router)
+	contractItemHandler.RegisterContractItemHandler(router)
+	supplierHandler.RegisterSupplierHandler(router)
 
 	// Serve static files
 	router.PathPrefix("/").Handler(http.FileServer(http.Dir("./static")))

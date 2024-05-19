@@ -1,6 +1,8 @@
 package repo
 
 import (
+	"strings"
+
 	"bioskop.com/projekat/bioskopIIS-backend/model"
 	"gorm.io/gorm"
 )
@@ -28,6 +30,23 @@ func (mr *MovieRepository) GetAll() ([]model.Movie, error) {
 	return movies, nil
 }
 
+func (mr *MovieRepository) GetFiltered(title string, year int) ([]model.Movie, error) {
+	var movies []model.Movie
+	db := mr.DatabaseConnection
+
+	if title != "" {
+		db = db.Where("LOWER(title) LIKE ?", "%"+strings.ToLower(title)+"%")
+	}
+	if year != 0 {
+		db = db.Where("year = ?", year)
+	}
+
+	if err := db.Find(&movies).Error; err != nil {
+		return nil, err
+	}
+	return movies, nil
+}
+
 func (mr *MovieRepository) GetByID(id uint) (model.Movie, error) {
 	var movie model.Movie
 	if err := mr.DatabaseConnection.First(&movie, id).Error; err != nil {
@@ -36,8 +55,35 @@ func (mr *MovieRepository) GetByID(id uint) (model.Movie, error) {
 	return movie, nil
 }
 
-func (mr *MovieRepository) Update(movie *model.Movie) error {
-	return mr.DatabaseConnection.Save(movie).Error
+func (mr *MovieRepository) GetByIDWithAssociations(id uint) (model.Movie, error) {
+	var movie model.Movie
+	if err := mr.DatabaseConnection.Preload("Actors").Preload("Directors").Preload("Contracts.Company").First(&movie, id).Error; err != nil {
+		return model.Movie{}, err
+	}
+	return movie, nil
+}
+
+func (mr *MovieRepository) Update(movie *model.Movie) (*model.Movie, error) {
+	db := mr.DatabaseConnection
+
+	if err := db.Save(movie).Error; err != nil {
+		return nil, err
+	}
+
+	if err := db.Model(movie).Association("Actors").Replace(movie.Actors); err != nil {
+		return nil, err
+	}
+
+	if err := db.Model(movie).Association("Directors").Replace(movie.Directors); err != nil {
+		return nil, err
+	}
+
+	updatedMovie, err := mr.GetByIDWithAssociations(movie.ID)
+	if err != nil {
+		return nil, err
+	}
+
+	return &updatedMovie, nil
 }
 
 func (mr *MovieRepository) Delete(id uint) error {
