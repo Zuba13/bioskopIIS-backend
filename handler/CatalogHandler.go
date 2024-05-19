@@ -142,3 +142,11 @@ func parseBoolQueryParam(r *http.Request, name string, defaultValue bool) (bool,
 	}
 	return strconv.ParseBool(valueStr)
 }
+
+func parseFloatQueryParam(r *http.Request, name string, defaultValue float64) (float64, error) {
+	valueStr := r.URL.Query().Get(name)
+	if valueStr == "" {
+		return defaultValue, nil
+	}
+	return strconv.ParseFloat(valueStr, 64)
+}

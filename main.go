@@ -24,6 +24,9 @@ func initDB() *gorm.DB {
 	}
 
 	// Auto-migrate models for the User and Movie modules
+	//database.Exec("ALTER TABLE projections ADD COLUMN IF NOT EXISTS is_canceled boolean;")
+	//database.Exec("UPDATE projections SET is_canceled = false WHERE is_canceled IS NULL;")
+	//database.Exec("ALTER TABLE projections ALTER COLUMN is_canceled SET NOT NULL;")
 	database.AutoMigrate(&model.TheatreInfo{})
 	database.AutoMigrate(&model.User{})
 	database.AutoMigrate(&model.Movie{})
@@ -107,6 +110,9 @@ func main() {
 	supplierHandler := &handler.SupplierHandler{SupplierService: *supplierService}
 
 	theatreInfoRepo := &repo.TheatreInfoRepository{DatabaseConnection: database}
+	repertoireHandler := &handler.TheatreRepertoireHandler{TheatreRepertoireService: *service.NewTheatreRepertoireService(movieRepo, projectionRepo, theatreInfoRepo,
+		distContractRepo, hallRepo)}
+
 	// Create a new router
 	router := mux.NewRouter().StrictSlash(true)
 
@@ -121,6 +127,7 @@ func main() {
 	contractHandler.RegisterContractHandler(router)
 	contractItemHandler.RegisterContractItemHandler(router)
 	supplierHandler.RegisterSupplierHandler(router)
+	repertoireHandler.RegisterTheatreRepertoireHandler(router)
 
 	// Serve static files
 	router.PathPrefix("/").Handler(http.FileServer(http.Dir("./static")))

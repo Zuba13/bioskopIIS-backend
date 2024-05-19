@@ -34,7 +34,8 @@ func (ps *ProjectionService) GetProjectionByID(id uint) (*model.Projection, erro
 
 // UpdateProjection updates an existing projection.
 func (ps *ProjectionService) UpdateProjection(projection *model.Projection) error {
-	return ps.ProjectionRepo.UpdateProjection(projection)
+	_, err := ps.ProjectionRepo.UpdateProjection(projection)
+	return err
 }
 
 // DeleteProjection deletes a projection by its ID.

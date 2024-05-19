@@ -19,11 +19,13 @@ VALUES
 ('user4', 'password4', 'user4@gmail.com', 'user', NOW(), NOW(), 'Bob', 'Brown', 1500),
 ('admin', 'admin123', 'admin@gmail.com', 'admin', NOW(), NOW(), 'Admin', 'User', 0);
 
-INSERT INTO public.halls (id, number_of_rows, seats_per_row)
+INSERT INTO public.halls (id, number_of_rows, seats_per_row, name)
 VALUES 
-(1, 10, 15),
-(2, 8, 12),
-(3, 6, 10);
+(1, 10, 15, 'Sala 1'),
+(2, 8, 12, 'Sala 2'),
+(3, 6, 10, 'Sala 3');
+(4, 8, 13, 'Sala 4');
+(5, 14, 25, 'Sala 5');
 
 INSERT INTO public.projections (
     movie_id, date, "time", created_at, updated_at, hall_id, price)
