@@ -9,21 +9,23 @@ import (
 )
 
 type TheatreRepertoireService struct {
-	MovieRepo       *repo.MovieRepository
-	ProjectionRepo  *repo.ProjectionRepository
-	TheatreInfoRepo *repo.TheatreInfoRepository
-	ContractRepo    *repo.DistributionContractRepository
-	HallRepo        *repo.HallRepository
+	MovieRepo           *repo.MovieRepository
+	ProjectionRepo      *repo.ProjectionRepository
+	TheatreInfoRepo     *repo.TheatreInfoRepository
+	ContractRepo        *repo.DistributionContractRepository
+	HallRepo            *repo.HallRepository
+	NotificationService *NotificationService
 }
 
 func NewTheatreRepertoireService(moviRepo *repo.MovieRepository, projectionRepo *repo.ProjectionRepository, theatreInfoRepo *repo.TheatreInfoRepository,
-	contractRepo *repo.DistributionContractRepository, hallRepo *repo.HallRepository) *TheatreRepertoireService {
+	contractRepo *repo.DistributionContractRepository, hallRepo *repo.HallRepository, notificationService *NotificationService) *TheatreRepertoireService {
 	return &TheatreRepertoireService{
-		MovieRepo:       moviRepo,
-		ProjectionRepo:  projectionRepo,
-		TheatreInfoRepo: theatreInfoRepo,
-		ContractRepo:    contractRepo,
-		HallRepo:        hallRepo,
+		MovieRepo:           moviRepo,
+		ProjectionRepo:      projectionRepo,
+		TheatreInfoRepo:     theatreInfoRepo,
+		ContractRepo:        contractRepo,
+		HallRepo:            hallRepo,
+		NotificationService: notificationService,
 	}
 }
 
@@ -230,6 +232,11 @@ func (trs *TheatreRepertoireService) CancelProjection(projectionId uint, cancelC
 	if err != nil {
 		return nil, err
 	}
+	err = trs.NotificationService.NotifyUsersAboutCancellation(projectionId)
+	if err != nil {
+		tx.Rollback()
+		return nil, err
+	}
 	canceledProjections = append(canceledProjections, *projection)
 
 	if !cancelConsecutive {
@@ -241,6 +248,7 @@ func (trs *TheatreRepertoireService) CancelProjection(projectionId uint, cancelC
 
 	canceledProjections, err = trs.cancelConsecutiveProjections(projection, tx, canceledProjections)
 	if err != nil {
+		tx.Rollback()
 		return nil, err
 	}
 
@@ -263,13 +271,16 @@ func (trs *TheatreRepertoireService) cancelConsecutiveProjections(projection *mo
 			if err == gorm.ErrRecordNotFound {
 				break
 			} else {
-				tx.Rollback()
 				return nil, err
 			}
 		}
 		nextProjection.IsCanceled = true
 		nextProjection.UpdatedAt = time.Now()
 		nextProjection, err = trs.ProjectionRepo.UpdateProjection(nextProjection, tx)
+		if err != nil {
+			return nil, err
+		}
+		err = trs.NotificationService.NotifyUsersAboutCancellation(projection.ID)
 		if err != nil {
 			return nil, err
 		}

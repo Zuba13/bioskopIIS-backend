@@ -1,0 +1,16 @@
+INSERT INTO public.halls (id, number_of_rows, seats_per_row, name)
+VALUES 
+(1, 10, 15, 'Sala 1'),
+(2, 8, 12, 'Sala 2'),
+(3, 6, 10, 'Sala 3');
+(4, 8, 13, 'Sala 4');
+(5, 14, 25, 'Sala 5');
+
+INSERT INTO public.tickets(
+	id, user_id, projection_id, row_num, seat_num, created_at, updated_at)
+	VALUES 
+    (1, 2, 10, 3, 5, NOW(), NOW()),
+    (1, 2, 10, 3, 6, NOW(), NOW()),
+    (3, 2, 10, 3, 7, NOW(), NOW()),
+    (4, 3, 10, 5, 2, NOW(), NOW()),
+    (5, 3, 10, 5, 3, NOW(), NOW());
