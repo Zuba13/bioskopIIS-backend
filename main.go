@@ -83,7 +83,7 @@ func main() {
 	hallHandler := &handler.HallHandler{HallService: *hallService}
 
 	ticketRepo := &repo.TicketRepository{DB: database}
-	ticketService := &service.TicketService{TicketRepository: *ticketRepo}
+	ticketService := service.NewTicketService(ticketRepo, userRepo)
 	ticketHandler := &handler.TicketHandler{TicketService: *ticketService, UserService: *userService, ProjectionService: *projectionService}
 
 	actorRepo := &repo.ActorRepository{DatabaseConnection: database}
@@ -116,7 +116,7 @@ func main() {
 
 	theatreInfoRepo := &repo.TheatreInfoRepository{DatabaseConnection: database}
 	repertoireHandler := &handler.TheatreRepertoireHandler{TheatreRepertoireService: *service.NewTheatreRepertoireService(movieRepo, projectionRepo, theatreInfoRepo,
-		distContractRepo, hallRepo, notificationService)}
+		distContractRepo, hallRepo, notificationService, ticketService)}
 
 	// Create a new router
 	router := mux.NewRouter().StrictSlash(true)

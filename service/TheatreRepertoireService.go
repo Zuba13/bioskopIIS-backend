@@ -15,10 +15,11 @@ type TheatreRepertoireService struct {
 	ContractRepo        *repo.DistributionContractRepository
 	HallRepo            *repo.HallRepository
 	NotificationService *NotificationService
+	TicketService       *TicketService
 }
 
 func NewTheatreRepertoireService(moviRepo *repo.MovieRepository, projectionRepo *repo.ProjectionRepository, theatreInfoRepo *repo.TheatreInfoRepository,
-	contractRepo *repo.DistributionContractRepository, hallRepo *repo.HallRepository, notificationService *NotificationService) *TheatreRepertoireService {
+	contractRepo *repo.DistributionContractRepository, hallRepo *repo.HallRepository, notificationService *NotificationService, ticketService *TicketService) *TheatreRepertoireService {
 	return &TheatreRepertoireService{
 		MovieRepo:           moviRepo,
 		ProjectionRepo:      projectionRepo,
@@ -26,6 +27,7 @@ func NewTheatreRepertoireService(moviRepo *repo.MovieRepository, projectionRepo 
 		ContractRepo:        contractRepo,
 		HallRepo:            hallRepo,
 		NotificationService: notificationService,
+		TicketService:       ticketService,
 	}
 }
 
@@ -237,6 +239,11 @@ func (trs *TheatreRepertoireService) CancelProjection(projectionId uint, cancelC
 		tx.Rollback()
 		return nil, err
 	}
+	err = trs.TicketService.RefundTickets(*projection)
+	if err != nil {
+		tx.Rollback()
+		return nil, err
+	}
 	canceledProjections = append(canceledProjections, *projection)
 
 	if !cancelConsecutive {
@@ -281,6 +288,10 @@ func (trs *TheatreRepertoireService) cancelConsecutiveProjections(projection *mo
 			return nil, err
 		}
 		err = trs.NotificationService.NotifyUsersAboutCancellation(projection.ID)
+		if err != nil {
+			return nil, err
+		}
+		err = trs.TicketService.RefundTickets(*projection)
 		if err != nil {
 			return nil, err
 		}

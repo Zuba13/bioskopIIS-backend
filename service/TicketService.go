@@ -6,12 +6,14 @@ import (
 )
 
 type TicketService struct {
-	TicketRepository repo.TicketRepository
+	TicketRepository *repo.TicketRepository
+	UserRepository   *repo.UserRepository
 }
 
-func NewTicketService(ticketRepo repo.TicketRepository) *TicketService {
+func NewTicketService(ticketRepo *repo.TicketRepository, userRepo *repo.UserRepository) *TicketService {
 	return &TicketService{
 		TicketRepository: ticketRepo,
+		UserRepository:   userRepo,
 	}
 }
 
@@ -41,4 +43,22 @@ func (ts *TicketService) GetTicketsByUserID(userID uint) ([]*model.Ticket, error
 
 func (ts *TicketService) GetTicketsByProjectionID(projectionId uint) ([]*model.Ticket, error) {
 	return ts.TicketRepository.GetTicketsByProjectionID(projectionId)
+}
+
+func (ts *TicketService) RefundTickets(projection model.Projection) error {
+	tickets, err := ts.TicketRepository.GetTicketsByProjectionID(projection.ID)
+	if err != nil {
+		return err
+	}
+	for _, ticket := range tickets {
+		user, err := ts.UserRepository.GetUserByID(ticket.UserID)
+		if err != nil {
+			return err
+		}
+		user.Money += projection.Price * 1.1
+		if err := ts.UserRepository.UpdateUser(user); err != nil {
+			return err
+		}
+	}
+	return nil
 }
