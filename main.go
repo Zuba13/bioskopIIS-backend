@@ -29,6 +29,7 @@ func initDB() *gorm.DB {
 	database.AutoMigrate(&model.Projection{})
 	database.AutoMigrate(&model.Hall{})
 	database.AutoMigrate(&model.Ticket{})
+	database.AutoMigrate(&model.Review{})
 
 	return database
 }
@@ -74,6 +75,10 @@ func main() {
 	ticketService := &service.TicketService{TicketRepository: *ticketRepo}
 	ticketHandler := &handler.TicketHandler{TicketService: *ticketService, UserService: *userService, ProjectionService: *projectionService}
 
+	reviewRepo := &repo.ReviewRepository{DatabaseConnection: database}
+	reviewService := &service.ReviewService{ReviewRepo: *reviewRepo}
+	reviewHandler := &handler.ReviewHandler{ReviewService: *reviewService}
+
 	// Create a new router
 	router := mux.NewRouter().StrictSlash(true)
 
@@ -83,6 +88,7 @@ func main() {
 	projectionHandler.RegisterProjectionHandler(router)
 	hallHandler.RegisterHallHandler(router)
 	ticketHandler.RegisterTicketHandler(router)
+	reviewHandler.RegisterReviewHandler(router)
 
 	// Serve static files
 	router.PathPrefix("/").Handler(http.FileServer(http.Dir("./static")))
