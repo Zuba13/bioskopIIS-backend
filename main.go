@@ -29,9 +29,13 @@ func initDB() *gorm.DB {
 	database.AutoMigrate(&model.Projection{})
 	database.AutoMigrate(&model.Hall{})
 	database.AutoMigrate(&model.Ticket{})
+	database.AutoMigrate(&model.Product{})
 	database.AutoMigrate(&model.Contract{})
 	database.AutoMigrate(&model.ContractItem{})
+	database.AutoMigrate(&model.StockItem{})
 	database.AutoMigrate(&model.Supplier{})
+	database.AutoMigrate(&model.MenuItem{})
+	database.AutoMigrate(&model.Menu{})
 	return database
 }
 
@@ -76,6 +80,22 @@ func main() {
 	ticketService := &service.TicketService{TicketRepository: *ticketRepo}
 	ticketHandler := &handler.TicketHandler{TicketService: *ticketService, UserService: *userService, ProjectionService: *projectionService}
 
+	productRepo := &repo.ProductRepository{DatabaseConnection: database}
+	productService := &service.ProductService{ProductRepository: *productRepo}
+	productHandler := &handler.ProductHandler{ProductService: *productService}
+
+	stockItemRepo := &repo.StockItemRepository{DatabaseConnection: database}
+	stockItemService := &service.StockItemService{StockItemRepository: *stockItemRepo}
+	stockItemHandler := &handler.StockItemHandler{StockItemService: *stockItemService}
+
+	menuItemRepo := &repo.MenuItemRepository{DatabaseConnection: database}
+	menuItemService := &service.MenuItemService{MenuItemRepository: *menuItemRepo}
+	menuItemHandler := &handler.MenuItemHandler{MenuItemService: *menuItemService}
+
+	menuRepo := &repo.MenuRepository{DatabaseConnection: database}
+	menuService := &service.MenuService{MenuRepository: *menuRepo}
+	menuHandler := &handler.MenuHandler{MenuService: *menuService}
+
 	contractRepo := &repo.ContractRepository{DatabaseConnection: database}
 	contractService := &service.ContractService{ContractRepository: *contractRepo}
 	contractHandler := &handler.ContractHandler{ContractService: *contractService}
@@ -98,6 +118,10 @@ func main() {
 	projectionHandler.RegisterProjectionHandler(router)
 	hallHandler.RegisterHallHandler(router)
 	ticketHandler.RegisterTicketHandler(router)
+	menuItemHandler.RegisterMenuItemHandler(router)
+	stockItemHandler.RegisterStockItemHandler(router)
+	menuHandler.RegisterMenuHandler(router)
+	productHandler.RegisterProductHandler(router)
 	contractHandler.RegisterContractHandler(router)
 	contractItemHandler.RegisterContractItemHandler(router)
 	supplierHandler.RegisterSupplierHandler(router)

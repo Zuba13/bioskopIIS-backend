@@ -22,7 +22,7 @@ func (cr *ContractRepository) Create(contract *model.Contract) (model.Contract, 
 
 func (cr *ContractRepository) GetAll() ([]model.Contract, error) {
 	var contracts []model.Contract
-	if err := cr.DatabaseConnection.Preload("ContractItems").Preload("Supplier").Find(&contracts).Error; err != nil {
+	if err := cr.DatabaseConnection.Preload("ContractItems.Product").Preload("Supplier").Find(&contracts).Error; err != nil {
 		return nil, err
 	}
 	return contracts, nil
@@ -30,7 +30,7 @@ func (cr *ContractRepository) GetAll() ([]model.Contract, error) {
 
 func (cr *ContractRepository) GetAllSupplierContracts(supplierId uint) ([]model.Contract, error) {
 	var contracts []model.Contract
-	if err := cr.DatabaseConnection.Preload("ContractItems").Preload("Supplier").Where("supplier_id = ?", supplierId).Find(&contracts).Error; err != nil {
+	if err := cr.DatabaseConnection.Preload("ContractItems.Product").Preload("Supplier").Where("supplier_id = ?", supplierId).Find(&contracts).Error; err != nil {
 		return nil, err
 	}
 	return contracts, nil
@@ -38,7 +38,7 @@ func (cr *ContractRepository) GetAllSupplierContracts(supplierId uint) ([]model.
 
 func (cr *ContractRepository) GetByID(id uint) (model.Contract, error) {
 	var contract model.Contract
-	if err := cr.DatabaseConnection.Preload("ContractItems").Preload("Supplier").First(&contract, id).Error; err != nil {
+	if err := cr.DatabaseConnection.Preload("ContractItems.Product").Preload("Supplier").First(&contract, id).Error; err != nil {
 		return model.Contract{}, err
 	}
 	return contract, nil

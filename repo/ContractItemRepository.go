@@ -22,7 +22,7 @@ func (cr *ContractItemRepository) Create(contractItem *model.ContractItem) (mode
 
 func (cr *ContractItemRepository) GetAll() ([]model.ContractItem, error) {
 	var contractItems []model.ContractItem
-	if err := cr.DatabaseConnection.Find(&contractItems).Error; err != nil {
+	if err := cr.DatabaseConnection.Preload("Product").Find(&contractItems).Error; err != nil {
 		return nil, err
 	}
 	return contractItems, nil
@@ -30,7 +30,7 @@ func (cr *ContractItemRepository) GetAll() ([]model.ContractItem, error) {
 
 func (cr *ContractItemRepository) GetByID(id uint) (model.ContractItem, error) {
 	var contractItem model.ContractItem
-	if err := cr.DatabaseConnection.First(&contractItem, id).Error; err != nil {
+	if err := cr.DatabaseConnection.Preload("Product").First(&contractItem, id).Error; err != nil {
 		return model.ContractItem{}, err
 	}
 	return contractItem, nil

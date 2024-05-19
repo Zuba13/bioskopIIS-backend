@@ -2,7 +2,6 @@ package handler
 
 import (
 	"encoding/json"
-	"fmt"
 	"net/http"
 	"strconv"
 	"time"
@@ -73,48 +72,6 @@ func (ch *ContractHandler) CreateContract(w http.ResponseWriter, r *http.Request
 
 	respondWithJSON(w, http.StatusCreated, contract)
 } 
-
-func (ch *ContractHandler) CreateContractWithItems(w http.ResponseWriter, r *http.Request) {
-	var newContract model.Contract
-	err := json.NewDecoder(r.Body).Decode(&newContract)
-	fmt.Println(r.Body)
-	fmt.Println(newContract)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
-		return
-	}
-
-	var conItems []model.ContractItem
-	err = json.NewDecoder(r.Body).Decode(&conItems)
-	fmt.Println(&conItems)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
-		return
-	}
-
-	contract, err := ch.ContractService.CreateContract(newContract)
-	if err != nil {
-		fmt.Println("Puklo")
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-
-	for _, item := range conItems {
-		// Do something with each contract item, e.g., validate or process
-		// item is of type model.ContractItem
-		contractItem, err := ch.ContractItemService.CreateContractItem(item)
-		fmt.Println("Usao u iteme")
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
-		}
-		// Append the newly created contract item to the contract object
-		contract.ContractItems = append(contract.ContractItems, contractItem)
-	}
-
-	respondWithJSON(w, http.StatusCreated, contract)
-}
-
 
 
 func (mh *ContractHandler) GetAllContracts(w http.ResponseWriter, r *http.Request) {
@@ -208,7 +165,7 @@ func mapContractItems(dtoItems []model.ContractItemDTO) []model.ContractItem {
 	var items []model.ContractItem
 	for _, dtoItem := range dtoItems {
 		item := model.ContractItem{
-			Name:     dtoItem.Name,
+			ProductId:     dtoItem.ProductId,
 			Quantity: dtoItem.Quantity,
 			Price:    dtoItem.Price,
 		}
