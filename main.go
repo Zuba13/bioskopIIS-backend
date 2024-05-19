@@ -29,6 +29,8 @@ func initDB() *gorm.DB {
 	database.AutoMigrate(&model.Projection{})
 	database.AutoMigrate(&model.Hall{})
 	database.AutoMigrate(&model.Ticket{})
+
+	database.AutoMigrate(&model.Review{})
 	database.AutoMigrate(&model.Actor{})
 	database.AutoMigrate(&model.Director{})
 	database.Exec("DO $$ BEGIN CREATE TYPE contractmodel AS ENUM ('Bidding', 'Percentage'); EXCEPTION WHEN duplicate_object THEN null; END $$;")
@@ -81,6 +83,11 @@ func main() {
 	ticketService := &service.TicketService{TicketRepository: *ticketRepo}
 	ticketHandler := &handler.TicketHandler{TicketService: *ticketService, UserService: *userService, ProjectionService: *projectionService}
 
+
+	reviewRepo := &repo.ReviewRepository{DatabaseConnection: database}
+	reviewService := &service.ReviewService{ReviewRepo: *reviewRepo}
+	reviewHandler := &handler.ReviewHandler{ReviewService: *reviewService}
+
 	actorRepo := &repo.ActorRepository{DatabaseConnection: database}
 	directorRepo := &repo.DirectorRepository{DatabaseConnection: database}
 	distContractRepo := &repo.DistributionContractRepository{DatabaseConnection: database}
@@ -114,6 +121,9 @@ func main() {
 	projectionHandler.RegisterProjectionHandler(router)
 	hallHandler.RegisterHallHandler(router)
 	ticketHandler.RegisterTicketHandler(router)
+
+	reviewHandler.RegisterReviewHandler(router)
+
 	catalogHandler.RegisterCatalogHandler(router)
 	distContractHandler.RegisterDistributionContractHandler(router)
 	contractHandler.RegisterContractHandler(router)
