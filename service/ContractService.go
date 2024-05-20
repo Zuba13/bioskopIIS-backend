@@ -38,3 +38,12 @@ func (contractService *ContractService) UpdateContract(contract *model.Contract)
 func (contractService *ContractService) DeleteContract(id uint) error {
 	return contractService.ContractRepository.Delete(id)
 }
+
+func (contractService *ContractService) GetTodayyWeeklyContracts() ([]model.Contract, error) {
+	return contractService.ContractRepository.GetAllContractFromWeeklyDelivery()
+}
+
+func (contractService *ContractService) GetTodayAtOnceContracts() ([]model.Contract, error) {
+	return contractService.ContractRepository.GetAllContractForTodayDelivery()
+}
+

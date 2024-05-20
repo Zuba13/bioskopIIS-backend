@@ -25,7 +25,6 @@ func NewContractHandler(contractService service.ContractService, contractItemSer
 
 func (mh *ContractHandler) RegisterContractHandler(r *mux.Router) {
 	r.HandleFunc("/contracts", mh.CreateContract).Methods("POST")
-	//r.HandleFunc("/contracts", mh.CreateContract).Methods("POST")
 	r.HandleFunc("/contracts", mh.GetAllContracts).Methods("GET")
 	r.HandleFunc("/suppliercontracts/{supplier_id}", mh.GetSupplierContracts).Methods("GET")
 	r.HandleFunc("/contracts/{id}", mh.GetContractByID).Methods("GET")
@@ -76,6 +75,26 @@ func (ch *ContractHandler) CreateContract(w http.ResponseWriter, r *http.Request
 
 func (mh *ContractHandler) GetAllContracts(w http.ResponseWriter, r *http.Request) {
 	contracts, err := mh.ContractService.GetAllContracts()
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	respondWithJSON(w, http.StatusOK, contracts)
+}
+
+func (mh *ContractHandler) GetAllWeeklyContracts(w http.ResponseWriter, r *http.Request) {
+	contracts, err := mh.ContractService.GetTodayyWeeklyContracts()
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	respondWithJSON(w, http.StatusOK, contracts)
+}
+
+func (mh *ContractHandler) GetAllAtOnceContracts(w http.ResponseWriter, r *http.Request) {
+	contracts, err := mh.ContractService.GetTodayAtOnceContracts()
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return

@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"net/http"
 
@@ -9,6 +10,7 @@ import (
 	"bioskop.com/projekat/bioskopIIS-backend/repo"
 	"bioskop.com/projekat/bioskopIIS-backend/service"
 	"github.com/gorilla/mux"
+	"github.com/robfig/cron/v3"
 	"github.com/rs/cors"
 	"golang.org/x/crypto/bcrypt"
 	"gorm.io/driver/postgres"
@@ -39,16 +41,20 @@ func initDB() *gorm.DB {
 	return database
 }
 
-func startServer(userHandler *handler.UserHandler, movieHandler *handler.MovieHandler) {
-	router := mux.NewRouter().StrictSlash(true)
+func startServer(router *mux.Router) {
+	// Create a new CORS middleware with desired options
+	corsMiddleware := cors.New(cors.Options{
+		AllowedOrigins:   []string{"http://localhost:4200"}, // Adjust as needed
+		AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
+		AllowedHeaders:   []string{"*"},
+		AllowCredentials: true,
+	})
 
-	userHandler.RegisterUserHandler(router)
-	movieHandler.RegisterMovieHandler(router)
-
-	router.PathPrefix("/").Handler(http.FileServer(http.Dir("./static")))
+	// Use the CORS middleware to wrap the router
+	handler := corsMiddleware.Handler(router)
 
 	log.Println("Server starting")
-	log.Fatal(http.ListenAndServe(":8085", router))
+	log.Fatal(http.ListenAndServe(":8085", handler))
 }
 
 func main() {
@@ -84,8 +90,12 @@ func main() {
 	productService := &service.ProductService{ProductRepository: *productRepo}
 	productHandler := &handler.ProductHandler{ProductService: *productService}
 
+	contractRepo := &repo.ContractRepository{DatabaseConnection: database}
+	contractService := &service.ContractService{ContractRepository: *contractRepo}
+	contractHandler := &handler.ContractHandler{ContractService: *contractService}
+
 	stockItemRepo := &repo.StockItemRepository{DatabaseConnection: database}
-	stockItemService := &service.StockItemService{StockItemRepository: *stockItemRepo}
+	stockItemService := &service.StockItemService{StockItemRepository: *stockItemRepo, ContractService: *contractService}
 	stockItemHandler := &handler.StockItemHandler{StockItemService: *stockItemService}
 
 	menuItemRepo := &repo.MenuItemRepository{DatabaseConnection: database}
@@ -96,9 +106,7 @@ func main() {
 	menuService := &service.MenuService{MenuRepository: *menuRepo}
 	menuHandler := &handler.MenuHandler{MenuService: *menuService}
 
-	contractRepo := &repo.ContractRepository{DatabaseConnection: database}
-	contractService := &service.ContractService{ContractRepository: *contractRepo}
-	contractHandler := &handler.ContractHandler{ContractService: *contractService}
+
 
 	contractItemRepo := &repo.ContractItemRepository{DatabaseConnection: database}
 	contractItemService := &service.ContractItemService{ContractItemRepository: *contractItemRepo}
@@ -129,21 +137,34 @@ func main() {
 	// Serve static files
 	router.PathPrefix("/").Handler(http.FileServer(http.Dir("./static")))
 
-	// Create a new CORS middleware with desired options
-	corsMiddleware := cors.New(cors.Options{
-		AllowedOrigins:   []string{"http://localhost:4200"}, // Adjust as needed
-		AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
-		AllowedHeaders:   []string{"*"},
-		AllowCredentials: true,
-	})
+	c := cron.New()
+	// Scheduled to run every 3 minutes for testing
+	_, err := c.AddFunc("3 * * * *", func() { stockItemService.DailyTaskForDelivery() })
+	// Schedule the task to run every day at 12:00
+	//_, err := c.AddFunc("0 12 * * *", func() { stockItemService.DailyTaskForDelivery() })
+	if err != nil {
+		fmt.Println("Error scheduling task:", err)
+		return
+	}
 
-	// Use the CORS middleware to wrap the router
-	handler := corsMiddleware.Handler(router)
+	c.Start()
+	
+	go stockItemService.DailyTaskForDelivery()
+
+	go startServer(router)
 
 	// Start the server with the CORS-enabled handler
-	log.Println("Server starting")
-	log.Fatal(http.ListenAndServe(":8085", handler))
+	//log.Println("Server starting")
+	//log.Fatal(http.ListenAndServe(":8085", handler))
+	
+
+	// Wait indefinitely
+	select {}
+
 }
+
+
+
 
 func hashPassword(password string) (string, error) {
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)

@@ -43,3 +43,11 @@ func (cr *StockItemRepository) Update(stockItem *model.StockItem) error {
 func (cr *StockItemRepository) Delete(id uint) error {
 	return cr.DatabaseConnection.Delete(&model.StockItem{}, id).Error
 }
+
+func (cr *StockItemRepository) GetByProductId(productId uint) (model.StockItem, error) {
+	var stockItem model.StockItem
+	if err := cr.DatabaseConnection.Preload("Product").First(&stockItem, productId).Error; err != nil {
+		return model.StockItem{}, err
+	}
+	return stockItem, nil
+}
