@@ -1,0 +1,255 @@
+{
+    "title": "The Dark Knight",
+    "year": 2008,
+    "genre": "Action",
+    "duration": 152,
+    "language": "English",
+    "defaultPrice": 10.0,
+    "image": "https://m.media-amazon.com/images/M/MV5BMTMxNTMwODM0NF5BMl5BanBnXkFtZTcwODAyMTk2Mw@@._V1_.jpg",
+    "actors": [
+        {
+            "firstName": "Christian",
+            "lastName": "Bale"
+        },
+        {
+            "firstName": "Heath",
+            "lastName": "Ledger"
+        }
+    ],
+    "directors": [
+        {
+            "firstName": "Christopher",
+            "lastName": "Nolan"
+        }
+    ]
+},
+{
+    "title": "Inception",
+    "year": 2010,
+    "genre": "Sci-Fi",
+    "duration": 148,
+    "language": "English",
+    "defaultPrice": 10.0,
+    "image": "https://m.media-amazon.com/images/M/MV5BMjAxMzY3NjcxNF5BMl5BanBnXkFtZTcwNTI5OTM0Mw@@._V1_FMjpg_UX1000_.jpg",
+    "actors": [
+        {
+            "firstName": "Leonardo",
+            "lastName": "DiCaprio"
+        },
+        {
+            "firstName": "Joseph",
+            "lastName": "Gordon-Levitt"
+        }
+    ],
+    "directors": [
+        {
+            "firstName": "Christopher",
+            "lastName": "Nolan"
+        }
+    ]
+},
+{
+    "title": "The Godfather",
+    "year": 1972,
+    "genre": "Crime",
+    "duration": 175,
+    "language": "English",
+    "defaultPrice": 10.0,
+    "image": "https://m.media-amazon.com/images/M/MV5BM2MyNjYxNmUtYTAwNi00MTYxLWJmNWYtYzZlODY3ZTk3OTFlXkEyXkFqcGdeQXVyNzkwMjQ5NzM@._V1_.jpg",
+    "actors": [
+        {
+            "firstName": "Marlon",
+            "lastName": "Brando"
+        },
+        {
+            "firstName": "Al",
+            "lastName": "Pacino"
+        }
+    ],
+    "directors": [
+        {
+            "firstName": "Francis Ford",
+            "lastName": "Coppola"
+        }
+    ]
+},
+{
+    "title": "Pulp Fiction",
+    "year": 1994,
+    "genre": "Crime",
+    "duration": 154,
+    "language": "English",
+    "defaultPrice": 10.0,
+    "image": "https://m.media-amazon.com/images/M/MV5BNGNhMDIzZTUtNTBlZi00MTRlLWFjM2ItYzViMjE3YzI5MjljXkEyXkFqcGdeQXVyNzkwMjQ5NzM@._V1_.jpg",
+    "actors": [
+        {
+            "firstName": "John",
+            "lastName": "Travolta"
+        },
+        {
+            "firstName": "Samuel L.",
+            "lastName": "Jackson"
+        }
+    ],
+    "directors": [
+        {
+            "firstName": "Quentin",
+            "lastName": "Tarantino"
+        }
+    ]
+},
+{
+    "title": "Fight Club",
+    "year": 1999,
+    "genre": "Drama",
+    "duration": 139,
+    "language": "English",
+    "defaultPrice": 10.0,
+    "image": "https://m.media-amazon.com/images/M/MV5BMmEzNTkxYjQtZTc0MC00YTVjLTg5ZTEtZWMwOWVlYzY0NWIwXkEyXkFqcGdeQXVyNzkwMjQ5NzM@._V1_.jpg",
+    "actors": [
+        {
+            "firstName": "Brad",
+            "lastName": "Pitt"
+        },
+        {
+            "firstName": "Edward",
+            "lastName": "Norton"
+        }
+    ],
+    "directors": [
+        {
+            "firstName": "David",
+            "lastName": "Fincher"
+        }
+    ]
+}
+
+{
+    "title": "Parasite",
+    "year": 2019,
+    "genre": "Thriller",
+    "duration": 132,
+    "language": "Korean",
+    "defaultPrice": 10.0,
+    "image": "https://m.media-amazon.com/images/S/pv-target-images/67f4f4fc5fc273fb0cb8a2417be73b9d650c3ead7bcf5b710bedb520d8b006c2.jpg",
+    "actors": [
+        {
+            "firstName": "Kang-ho",
+            "lastName": "Song"
+        },
+        {
+            "firstName": "Sun-kyun",
+            "lastName": "Lee"
+        }
+    ],
+    "directors": [
+        {
+            "firstName": "Bong",
+            "lastName": "Joon Ho"
+        }
+    ]
+},
+{
+    "title": "Joker",
+    "year": 2019,
+    "genre": "Crime",
+    "duration": 122,
+    "language": "English",
+    "defaultPrice": 10.0,
+    "image": "https://m.media-amazon.com/images/I/817ZjZCTQoL._AC_UF1000,1000_QL80_.jpg",
+    "actors": [
+        {
+            "firstName": "Joaquin",
+            "lastName": "Phoenix"
+        },
+        {
+            "firstName": "Robert",
+            "lastName": "De Niro"
+        }
+    ],
+    "directors": [
+        {
+            "firstName": "Todd",
+            "lastName": "Phillips"
+        }
+    ]
+},
+{
+    "title": "1917",
+    "year": 2019,
+    "genre": "War",
+    "duration": 119,
+    "language": "English",
+    "defaultPrice": 10.0,
+    "image": "https://m.media-amazon.com/images/S/pv-target-images/379ce2e2cfb57394f1727db2f8e95ae54755a36f093decdbd7463fc7750e18b8.jpg",
+    "actors": [
+        {
+            "firstName": "George",
+            "lastName": "MacKay"
+        },
+        {
+            "firstName": "Dean-Charles",
+            "lastName": "Chapman"
+        }
+    ],
+    "directors": [
+        {
+            "firstName": "Sam",
+            "lastName": "Mendes"
+        }
+    ]
+},
+{
+    "title": "Once Upon a Time in Hollywood",
+    "year": 2019,
+    "genre": "Comedy",
+    "duration": 161,
+    "language": "English",
+    "defaultPrice": 10.0,
+    "image": "https://m.media-amazon.com/images/I/91xhpS9unLL._AC_UF894,1000_QL80_.jpg",
+    "actors": [
+        {
+            "firstName": "Leonardo",
+            "lastName": "DiCaprio"
+        },
+        {
+            "firstName": "Brad",
+            "lastName": "Pitt"
+        }
+    ],
+    "directors": [
+        {
+            "firstName": "Quentin",
+            "lastName": "Tarantino"
+        }
+    ]
+},
+{
+    "title": "Avengers: Endgame",
+    "year": 2019,
+    "genre": "Action",
+    "duration": 181,
+    "language": "English",
+    "defaultPrice": 10.0,
+    "image": "https://m.media-amazon.com/images/I/81Gzqypd8lL._AC_UF1000,1000_QL80_.jpg",
+    "actors": [
+        {
+            "firstName": "Robert",
+            "lastName": "Downey Jr."
+        },
+        {
+            "firstName": "Chris",
+            "lastName": "Evans"
+        }
+    ],
+    "directors": [
+        {
+            "firstName": "Anthony",
+            "lastName": "Russo"
+        },
+        {
+            "firstName": "Joe",
+            "lastName": "Russo"
+        }
+    ]
+}
