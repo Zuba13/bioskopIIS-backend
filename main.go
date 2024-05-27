@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"log"
 	"net/http"
 
@@ -38,6 +37,8 @@ func initDB() *gorm.DB {
 	database.AutoMigrate(&model.Supplier{})
 	database.AutoMigrate(&model.MenuItem{})
 	database.AutoMigrate(&model.Menu{})
+	database.AutoMigrate(&model.SupplierProduct{})
+	database.AutoMigrate(&model.OrderSuggestion{})
 	return database
 }
 
@@ -139,17 +140,17 @@ func main() {
 
 	c := cron.New()
 	// Scheduled to run every 3 minutes for testing
-	_, err := c.AddFunc("3 * * * *", func() { stockItemService.DailyTaskForDelivery() })
+	//_, err := c.AddFunc("/3 * * * *", func() { stockItemService.DailyTaskForDelivery() })
 	// Schedule the task to run every day at 12:00
 	//_, err := c.AddFunc("0 12 * * *", func() { stockItemService.DailyTaskForDelivery() })
-	if err != nil {
-		fmt.Println("Error scheduling task:", err)
-		return
-	}
+	// if err != nil {
+	// 	fmt.Println("Error scheduling task:", err)
+	// 	return
+	// }
 
 	c.Start()
 	
-	go stockItemService.DailyTaskForDelivery()
+	//go stockItemService.DailyTaskForDelivery()
 
 	go startServer(router)
 

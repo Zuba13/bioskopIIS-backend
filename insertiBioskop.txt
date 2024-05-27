@@ -186,18 +186,18 @@ INSERT INTO public.products(id, name, producer)
 (9, 'Negazirana voda', 'Vitinka'),
 (10, 'Red bull', 'Coca cola doo');
 
-INSERT INTO public.stock_items(id, product_id, quantity)
+INSERT INTO public.stock_items(id, product_id, quantity, optimal_quantity)
 	VALUES 
-(1, 1, 10),
-(2, 2, 20),
-(3, 3, 30),
-(4, 4, 40),
-(5, 5, 50),
-(6, 6, 60),
-(7, 7, 70),
-(8, 8, 80),
-(9, 9, 90),
-(10, 10, 100);
+(1, 1, 10,100),
+(2, 2, 20,100),
+(3, 3, 30,100),
+(4, 4, 40,100),
+(5, 5, 50,100),
+(6, 6, 60,100),
+(7, 7, 70,100),
+(8, 8, 80,100),
+(9, 9, 90,100),
+(10, 10, 100,100);
 
 INSERT INTO public.suppliers(id, name, street, city, country, phone, email)
 	VALUES  
