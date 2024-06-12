@@ -3,6 +3,7 @@ package handler
 import (
 	"encoding/json"
 	"net/http"
+	"strconv"
 	"time"
 
 	model "bioskop.com/projekat/bioskopIIS-backend/model"
@@ -24,7 +25,7 @@ func (rh *TheatreRepertoireHandler) RegisterTheatreRepertoireHandler(r *mux.Rout
 	r.HandleFunc("/repertoire/timeslot", RequireRole("manager", rh.GetAvailableTimeslots)).Methods("GET")
 	r.HandleFunc("/repertoire", RequireRole("manager", rh.AddProjection)).Methods("POST")
 	r.HandleFunc("/repertoire", RequireRole("manager", rh.GetProjections)).Methods("GET")
-	r.HandleFunc("/repertoire/consecutive-days", RequireRole("manager", rh.CountConsecutiveDaysWithProjections)).Methods("GET")
+	r.HandleFunc("/repertoire/consecutive-days/{projectionId}", RequireRole("manager", rh.CountConsecutiveDaysWithProjections)).Methods("GET")
 	r.HandleFunc("/repertoire/projection", RequireRole("manager", rh.CancelProjection)).Methods("DELETE")
 }
 
@@ -167,14 +168,16 @@ func (rh *TheatreRepertoireHandler) GetProjections(w http.ResponseWriter, r *htt
 }
 
 func (rh *TheatreRepertoireHandler) CountConsecutiveDaysWithProjections(w http.ResponseWriter, r *http.Request) {
-	projectionId, err := parseIntQueryParam(r, "projectionId", 0)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
+	params := mux.Vars(r)
+	projectionIdStr, ok := params["projectionId"]
+	if !ok {
+		http.Error(w, "Missing required path parameter", http.StatusBadRequest)
 		return
 	}
 
-	if projectionId == 0 {
-		http.Error(w, "Missing required query parameters", http.StatusBadRequest)
+	projectionId, err := strconv.Atoi(projectionIdStr)
+	if err != nil {
+		http.Error(w, "Invalid projectionId", http.StatusBadRequest)
 		return
 	}
 
